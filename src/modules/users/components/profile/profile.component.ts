@@ -1,11 +1,8 @@
-import { TuiRoot } from "@taiga-ui/core";
-import { KeyValuePipe, NgForOf } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Component, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import ProfileComponent from "../modules/users/components/profile/profile.component";
+import {KeyValuePipe, NgForOf} from '@angular/common';
+import {Component, inject} from '@angular/core';
+import {FormsModule} from '@angular/forms';
 import {RouterLink, RouterLinkActive} from '@angular/router';
-import { tuiAsPortal, TuiPortals, TuiRepeatTimes, TuiThemeColorService } from '@taiga-ui/cdk';
+import {tuiAsPortal, TuiPortals, TuiRepeatTimes, TuiThemeColorService} from '@taiga-ui/cdk';
 import {
     TuiAppearance,
     TuiButton,
@@ -28,12 +25,9 @@ import {
 import {TuiCardLarge, TuiHeader, TuiNavigation} from '@taiga-ui/layout';
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-profile',
   standalone: true,
   imports: [
-    RouterOutlet,
-    TuiRoot,
-    ProfileComponent,
     FormsModule,
     KeyValuePipe,
     NgForOf,
@@ -56,16 +50,11 @@ import {TuiCardLarge, TuiHeader, TuiNavigation} from '@taiga-ui/layout';
     TuiRepeatTimes,
     TuiSwitch,
     TuiTabs,
-    TuiTitle
+    TuiTitle,
   ],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.less'
+  templateUrl: './profile.component.html',
+  styleUrl: './profile.component.less',
+  providers: [TuiDropdownService, tuiAsPortal(TuiDropdownService)],
 })
-export class AppComponent {
-  private readonly theme = inject(TuiThemeColorService);
-  protected color = false;
-
-  protected onColor(color: boolean): void {
-    this.theme.color = color ? 'gray' : 'black';
-  }
+export default class ProfileComponent extends TuiPortals {
 }
