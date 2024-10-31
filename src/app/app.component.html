@@ -1,6 +1,14 @@
 <header tuiNavigationHeader>
   <button
     appearance="secondary-grayscale"
+    iconStart="@tui.user"
+    tuiButton
+    type="button"
+    routerLink="/login">
+    Авторизация
+  </button>
+  <button
+    appearance="secondary-grayscale"
     iconStart="@tui.home"
     tuiButton
     type="button">
@@ -49,8 +57,8 @@
       [ngModel]="color"
       (ngModelChange)="onColor($event)" />
   </span>
-  <tui-avatar src="AI"/>
+  <tui-avatar src="AI" routerLink="/profile"/>
 </header>
-<main tuiNavigationMain>
-  <app-profile></app-profile>
+<main tuiNavigationMain style="padding: 0;">
+  <router-outlet></router-outlet>
 </main>
