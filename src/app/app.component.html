@@ -1,64 +1,78 @@
-<header tuiNavigationHeader>
-  <button
-    appearance="secondary-grayscale"
-    iconStart="@tui.user"
-    tuiButton
-    type="button"
-    routerLink="/login">
-    Авторизация
-  </button>
-  <button
-    appearance="secondary-grayscale"
-    iconStart="@tui.home"
-    tuiButton
-    type="button">
-    Главная
-  </button>
-  <button
-    appearance="secondary-grayscale"
-    iconStart="@tui.users"
-    tuiButton
-    type="button">
-    Группы
-  </button>
-  <button
-    appearance="secondary-grayscale"
-    iconStart="@tui.calendar-check-2"
-    tuiButton
-    type="button">
-    Расписание
-  </button>
-  <button
-    appearance="secondary-grayscale"
-    iconStart="@tui.russian-ruble"
-    tuiButton
-    type="button">
-    Взаиморасчеты
-  </button>
-  <button
-    iconStart="@tui.bell"
-    tuiIconButton
-    type="button">
-    Notifications
-    <tui-badge-notification />
-  </button>
-  <button
-    iconStart="@tui.ellipsis"
-    tuiIconButton
-    type="button">
-    More
-  </button>
-  <hr/>
-  <span tuiNavigationLogo>
-    Ночной режим
-    <input
-      tuiSwitch
-      type="checkbox"
-      [ngModel]="color"
-      (ngModelChange)="onColor($event)" />
-  </span>
-  <tui-avatar src="AI" routerLink="/profile"/>
-</header>
-<main tuiNavigationMain style="padding: 0;">
-  <router-outlet></router-outlet>
-</main>
+<tui-root>
+  <header tuiNavigationHeader>
+    <button
+      appearance="secondary-grayscale"
+      iconStart="@tui.user"
+      tuiButton
+      type="button"
+      routerLink="/login">
+      Авторизация
+    </button>
+    <button
+      appearance="secondary-grayscale"
+      iconStart="@tui.home"
+      tuiButton
+      type="button"
+      routerLink="/">
+      Главная
+    </button>
+    <button
+      appearance="secondary-grayscale"
+      iconStart="@tui.users"
+      tuiButton
+      type="button"
+      routerLink="/groups">
+      Группы
+    </button>
+    <button
+      appearance="secondary-grayscale"
+      iconStart="@tui.users"
+      tuiButton
+      type="button"
+      routerLink="/users">
+      Пользователи
+    </button>
+    <button
+      appearance="secondary-grayscale"
+      iconStart="@tui.calendar-check-2"
+      tuiButton
+      type="button"
+      routerLink="/schedule">
+      Расписание
+    </button>
+    <button
+      appearance="secondary-grayscale"
+      iconStart="@tui.russian-ruble"
+      tuiButton
+      type="button"
+      routerLink="/accounting">
+      Взаиморасчеты
+    </button>
+    <button
+      iconStart="@tui.bell"
+      tuiIconButton
+      type="button">
+      Notifications
+      <tui-badge-notification />
+    </button>
+    <button
+      iconStart="@tui.ellipsis"
+      tuiIconButton
+      type="button">
+      More
+    </button>
+    <hr/>
+    <span tuiNavigationLogo>
+      Ночной режим
+      <input
+        tuiSwitch
+        type="checkbox"
+        [ngModel]="color"
+        (ngModelChange)="onColor($event)" />
+    </span>
+    <tui-avatar src="AI" routerLink="/profile"/>
+  </header>
+  <main tuiNavigationMain style="padding: 12px;">
+    <router-outlet></router-outlet>
+  </main>
+</tui-root>

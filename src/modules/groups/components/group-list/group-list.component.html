@@ -1,0 +1,70 @@
+<div style="display: flex; align-items: stretch; gap: 16px">
+  <div style="width: 100%;">
+    <search tuiSearch>
+      <form [formGroup]="searchForm">
+        <fieldset tuiTextfieldSize="m">
+          <tui-textfield iconStart="@tui.search">
+            <input
+              formControlName="search"
+              placeholder="Название группы"
+              tuiTextfield />
+          </tui-textfield>
+          <button
+            size="m"
+            tuiButton
+            type="button">
+            Поиск
+          </button>
+        </fieldset>
+      </form>
+    </search>
+    <tui-accordion class="container" style="margin-top: 16px;">
+      @for (group of groups; track $index) {
+      <tui-accordion-item [showArrow]="false" (click)="selectGroup(group)"
+        [style.background]="(group == selectedGroup) ? 'AliceBlue' : ''">
+        {{ group }}
+      </tui-accordion-item>
+      }
+    </tui-accordion>
+  </div>
+  <div
+    tuiAppearance="floating"
+    tuiCardLarge
+    style="width: 25%;">
+    <header tuiHeader>
+      <h1 tuiTitle>
+        {{ selectedGroup ?? "Группа не выбрана" }}
+        <span tuiSubtitle>{{ students.length }} учащихся</span>
+      </h1>
+      <aside tuiAccessories>
+        <tui-avatar
+          appearance="primary"
+          src="@tui.star" />
+      </aside>
+    </header>
+    <main>
+      <ol class="tui-list tui-list_large tui-list_ordered">
+        @for (student of students; track $index) {
+        <li class="tui-list__item">{{ student }}</li>
+        }
+      </ol>
+    </main>
+    <footer>
+      <div
+        tuiAppearance="floating"
+        tuiButtonGroup>
+        <button
+          type="button"
+          [routerLink]="'/group/' + selectedGroup">
+          <tui-icon icon="@tui.pencil"/>
+          Изменить
+        </button>
+        <button type="button"
+          (click)="approveGroupDeletion()">
+          <tui-icon icon="@tui.circle-x"/>
+          Удалить
+        </button>
+      </div>
+    </footer>
+  </div>
+</div>

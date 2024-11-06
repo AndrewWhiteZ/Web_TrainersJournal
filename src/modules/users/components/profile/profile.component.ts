@@ -58,11 +58,11 @@ import {TuiCardLarge, TuiHeader, TuiNavigation} from '@taiga-ui/layout';
   providers: [TuiDropdownService, tuiAsPortal(TuiDropdownService)],
 })
 export default class ProfileComponent extends TuiPortals {
-  name: String = "Andrew Fer";
-  phone: String = "+7 (908) 918-30-22";
+  name: String = "Surname Name Patronymic";
+  phone: String = "+7 (123) 456-78-90";
   group: String = "ГД-000001";
   gender: String = "Мужской";
   belt: String = "Желтый";
   parentPhone: String = "8 (800) 555-35-35";
-  parentFullName: String = "Family Name Patronym";
+  parentFullName: String = "Surname Name Patronymic";
 }
