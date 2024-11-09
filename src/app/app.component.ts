@@ -85,18 +85,13 @@ export class AppComponent {
   });
 
   protected showDialog(): void {
-    this.dialogs.open('Hello!').subscribe();
+    this.dialog().subscribe({
+      next: (data) => {
+        console.info(`Dialog emitted data = ${data}`);
+      },
+      complete: () => {
+        console.info('Dialog closed');
+      },
+    });
   }
-
-  // protected showDialog(): void {
-  //   console.log(21);
-  //   this.dialog(21).subscribe({
-  //     next: (data) => {
-  //       console.info(`Dialog emitted data = ${data}`);
-  //     },
-  //     complete: () => {
-  //       console.info('Dialog closed');
-  //     },
-  //   });
-  // }
 }

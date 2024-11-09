@@ -48,19 +48,6 @@
       routerLink="/accounting">
       Взаиморасчеты
     </button>
-    <button
-      iconStart="@tui.bell"
-      tuiIconButton
-      type="button">
-      Notifications
-      <tui-badge-notification />
-    </button>
-    <button
-      iconStart="@tui.ellipsis"
-      tuiIconButton
-      type="button">
-      More
-    </button>
     <hr/>
     <span tuiNavigationLogo>
       Ночной режим
@@ -70,7 +57,7 @@
         [ngModel]="color"
         (ngModelChange)="onColor($event)" />
     </span>
-    <tui-avatar src="AI" routerLink="/profile"/>
+    <tui-avatar src="AI" routerLink="/profile" (click)="showDialog()"/>
   </header>
   <main tuiNavigationMain style="padding: 12px;">
     <router-outlet></router-outlet>
