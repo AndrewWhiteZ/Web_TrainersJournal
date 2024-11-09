@@ -20,7 +20,7 @@
     </search>
     <tui-accordion class="container" style="margin-top: 16px;">
       @for (group of groups; track $index) {
-      <tui-accordion-item [showArrow]="false" (click)="selectGroup(group)"
+      <tui-accordion-item [showArrow]="false" (click)="selectGroup(group)" (dblclick)="changeRoute(group)"
         [style.background]="(group == selectedGroup) ? 'AliceBlue' : ''">
         {{ group }}
       </tui-accordion-item>

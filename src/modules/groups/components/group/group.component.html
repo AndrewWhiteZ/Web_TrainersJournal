@@ -1,1 +1,93 @@
-<p>group works!</p>
+<div style="margin-left: 16px; margin-right: 16px; margin-top: 10px;">
+  <div tuiHeader="xxl">
+    <h1 tuiTitle style="margin-top: 0px; margin-bottom: 0;">
+      <div tuiCaption>Группа</div>
+      {{ this.groupId }}
+    </h1>
+    <div tuiAccessories>
+      <button
+        appearance="primary"
+        size="m"
+        tuiButton
+        type="button">
+        <tui-icon
+          icon="@tui.user-round-plus"
+          [style.height.rem]="1"/>
+        Добавить
+      </button>
+      <button
+        appearance="accent"
+        size="m"
+        tuiButton
+        type="button">
+        <tui-icon
+          icon="@tui.user-round-x"
+          [style.height.rem]="1" />
+        Удалить
+      </button>
+    </div>
+  </div>
+</div>
+
+<tui-scrollbar>
+  <cdk-virtual-scroll-viewport
+    #viewport
+    appendOnly
+    tuiScrollable
+    class="viewport tui-zero-scrollbar"
+    [itemSize]="45"
+    [maxBufferPx]="500"
+    [minBufferPx]="400">
+    <table
+      tuiTable
+      [columns]="columns">
+      <thead>
+        <tr tuiThGroup>
+          <th
+            *tuiHead="'name'"
+            tuiTh
+            [sticky]="true"
+            [style.top.px]="-(viewport.getOffsetToRenderedContentStart() || 0)">
+            ФИО
+          </th>
+          <th
+            *tuiHead="'dob'"
+            tuiTh
+            [sticky]="true"
+            [style.top.px]="-(viewport.getOffsetToRenderedContentStart() || 0)">
+            Дата рождения
+          </th>
+          <th
+            *tuiHead="'age'"
+            tuiTh
+            [sorter]="ageSorter"
+            [sticky]="true"
+            [style.top.px]="-(viewport.getOffsetToRenderedContentStart() || 0)">
+            Возраст
+          </th>
+        </tr>
+      </thead>
+      <tbody tuiTbody>
+        <tr
+          *cdkVirtualFor="let item of data | tuiTableSort"
+          tuiTr>
+          <td
+            *tuiCell="'name'"
+            tuiTd>
+            {{ item.name }}
+          </td>
+          <td
+            *tuiCell="'dob'"
+            tuiTd>
+            {{ item.dob }}
+          </td>
+          <td
+            *tuiCell="'age'"
+            tuiTd>
+            {{ getAge(item) }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </cdk-virtual-scroll-viewport>
+</tui-scrollbar>

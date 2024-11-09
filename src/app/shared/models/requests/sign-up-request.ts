@@ -4,5 +4,5 @@ export interface SignUpRequest {
   login: String,
   password: String,
   phone: String,
-  role: String
+  role: String,
 }

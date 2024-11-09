@@ -1,0 +1,30 @@
+table {
+  inline-size: 100%;
+
+  tr {
+      block-size: 2.8125rem;
+  }
+
+  td {
+      &:first-child {
+          inline-size: 10rem;
+          font-weight: bold;
+      }
+
+      &:last-child {
+          inline-size: 3rem;
+      }
+  }
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.description {
+  font: var(--tui-font-text-l);
+  margin-top: 0.5rem;
+  max-inline-size: 30rem;
+}

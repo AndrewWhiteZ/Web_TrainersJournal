@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { TuiAlertService, TuiAppearance, TuiButton, TuiDialogService, TuiIcon, TuiTextfield, TuiTitle } from '@taiga-ui/core';
 import { TUI_CONFIRM, TuiAccordion, TuiAccordionItem, TuiAvatar, TuiButtonGroup, TuiConfirmData } from '@taiga-ui/kit';
 import { TuiCardLarge, TuiHeader, TuiSearch } from '@taiga-ui/layout';
@@ -30,6 +30,8 @@ import { switchMap } from 'rxjs';
   styleUrl: './group-list.component.less'
 })
 export class GroupListComponent {
+
+  constructor(private router: Router) {}
 
   private readonly dialogs = inject(TuiDialogService);
   private readonly alerts = inject(TuiAlertService);
@@ -62,6 +64,10 @@ export class GroupListComponent {
         })
         .pipe(switchMap((response) => this.alerts.open(String(response))))
         .subscribe();
+  }
+
+  changeRoute(route: String) {
+    this.router.navigate(['group/', route]);
   }
 
 }

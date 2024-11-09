@@ -1,8 +1,8 @@
 export interface UserDto {
-  id: String,
-  fullName: String,
-  role: String,
-  email: String,
-  login: String,
-  phone: String,
+  id: string;
+  fullName: string;
+  login: string;
+  email: string;
+  phone: string;
+  role: string;
 }
