@@ -11,7 +11,11 @@ export class UserMapper {
       login: dto.login,
       email: dto.email,
       phone: dto.phone,
-      role: UserRole[dto.role as keyof typeof UserRole]
+      role: UserRole[dto.role as keyof typeof UserRole],
+      beltLevel: null,
+      birthDate: null,
+      parentFullName: null,
+      parentPhone: null,
     }
   }
 

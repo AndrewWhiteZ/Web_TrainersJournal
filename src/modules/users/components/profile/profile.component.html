@@ -1,59 +1,61 @@
-<main tuiNavigationMain style="margin: 1%;">
+<main tuiNavigationMain>
   <div tuiAppearance="floating" tuiCardLarge>
     <header tuiHeader="xl">
       <h2 tuiTitle>
         <div tuiCaption>Пользователь</div>
-        {{name}}
-        <div tuiSubtitle>Учащийся</div>
+        {{ currentUser!.fullName }}
+        <div tuiSubtitle>{{ currentUser!.role }}</div>
       </h2>
       <div tuiAccessories>
         <tui-avatar
-          [src]="'AF'"
+          [src]="currentUser!.fullName.split(' ')[1][0] + currentUser!.fullName.split(' ')[2][0]"
           size="xxl" />
       </div>
     </header>
     <div tuiHeader="xs">
       <h6 tuiTitle>
-        Номер телефона: {{ phone }}
+        Номер телефона: {{ currentUser!.phone }}
       </h6>
     </div>
     <div tuiHeader="xs">
       <h6 tuiTitle>
-        Группа: {{ group }}
+        Электронная почта: {{ currentUser!.email }}
       </h6>
     </div>
   </div>
-  <div tuiAppearance="floating" tuiCardLarge style="margin-top: 1%;">
-    <header tuiHeader="xxl">
-      <h1 tuiTitle>
-        <div tuiCaption>Дополнительная информация</div>
-      </h1>
-    </header>
-    <section class="actions">
-      <div tuiCell="l" tuiHeader="s">
-        <div tuiTitle>
-          {{gender}}
-          <div tuiSubtitle>Пол</div>
+  @if(currentUser?.role === "Учащийся") {
+    <div tuiAppearance="floating" tuiCardLarge style="margin-top: 1%;">
+      <header tuiHeader="xxl">
+        <h1 tuiTitle>
+          <div tuiCaption>Дополнительная информация</div>
+        </h1>
+      </header>
+      <section class="actions">
+        <div tuiCell="l" tuiHeader="s">
+          <div tuiTitle>
+            {{ currentUser!.parentFullName }}
+            <div tuiSubtitle>Родитель</div>
+          </div>
         </div>
-      </div>
-      <div tuiCell="l" tuiHeader="s">
-        <div tuiTitle>
-          {{parentFullName}}
-          <div tuiSubtitle>Родитель</div>
+        <div tuiCell="l" tuiHeader="s">
+          <div tuiTitle>
+            {{ currentUser!.birthDate }}
+            <div tuiSubtitle>Дата рождения</div>
+          </div>
         </div>
-      </div>
-      <div tuiCell="l" tuiHeader="s">
-        <div tuiTitle>
-          {{belt}}
-          <div tuiSubtitle>Пояс</div>
+        <div tuiCell="l" tuiHeader="s">
+          <div tuiTitle>
+            {{ currentUser!.parentPhone }}
+            <div tuiSubtitle>Телефон родителя</div>
+          </div>
         </div>
-      </div>
-      <div tuiCell="l" tuiHeader="s">
-        <div tuiTitle>
-          {{parentPhone}}
-          <div tuiSubtitle>Телефон родителя</div>
+        <div tuiCell="l" tuiHeader="s">
+          <div tuiTitle>
+            {{ currentUser!.beltLevel }}
+            <div tuiSubtitle>Пояс</div>
+          </div>
         </div>
-      </div>
-    </section>
-  </div>
+      </section>
+    </div>
+  }
 </main>

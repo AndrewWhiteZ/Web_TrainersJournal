@@ -1,5 +1,7 @@
 <div class="tui-container">
-  <form [formGroup]="activeTabIndex == 0 ? loginForm : signUpForm" (submit)="activeTabIndex == 0 ? submitLogin() : submitSignUp()" (reset)="reset()">
+  <form [formGroup]="activeTabIndex == 0 ? loginForm : signUpForm"
+    (submit)="activeTabIndex == 0 ? submitLogin() : submitSignUp()"
+    (reset)="reset()">
     <div class="tui-row tui-row_sme">
       <div class="tui-col_8">
         <div class="tui-form__row">
@@ -24,8 +26,7 @@
             Номер телефона
             <input
               autocomplete="tel"
-              tuiTextfieldLegacy
-            />
+              tuiTextfieldLegacy />
           </tui-input-phone>
         </div>
         <div class="tui-form__field-note">Или</div>
@@ -71,6 +72,18 @@
         </div>
         } @else {
         <div class="tui-form__row">
+          <tui-select
+            class="tui-space_vertical-4"
+            formControlName="roleValue">
+            Роль пользователя
+            <input
+              tuiTextfieldLegacy />
+            <tui-data-list-wrapper
+              *tuiDataList
+              [items]="userRoles" />
+          </tui-select>
+        </div>
+        <div class="tui-form__row">
           <tui-textfield>
             <label tuiLabel>Логин</label>
             <input
@@ -111,8 +124,7 @@
             Номер телефона
             <input
               autocomplete="tel"
-              tuiTextfieldLegacy
-            />
+              tuiTextfieldLegacy />
           </tui-input-phone>
         </div>
         <div class="tui-form__row">
@@ -128,18 +140,41 @@
             <tui-icon tuiPassword />
           </tui-textfield>
         </div>
+        @if(signUpForm.controls.roleValue.value === "Учащийся") {
         <div class="tui-form__row">
-          <tui-select
-            class="tui-space_vertical-4"
-            formControlName="roleValue">
-            Роль пользователя
+          <tui-input-number
+            formControlName="beltLevelValue"
+            [min]="0"
+            [max]="10">Уровень пояса</tui-input-number>
+        </div>
+        <div class="tui-form__row">
+          <tui-input-date
+            formControlName="birthDateValue">
+            Дата рождения
+          </tui-input-date>
+          <tui-error
+            formControlName="birthDateValue"
+            [error]="[] | tuiFieldError | async" />
+        </div>
+        <div class="tui-form__row">
+          <tui-textfield>
+            <label tuiLabel>Полное имя родителя</label>
+            <input
+              tuiTextfield
+              formControlName="parentFullNameValue">
+            <tui-error
+              formControlName="parentFullNameValue"
+              [error]="[] | tuiFieldError | async" />
+          </tui-textfield>
+        </div>
+        <div class="tui-form__row">
+          <tui-input-phone formControlName="parentPhoneValue">
+            Номер телефона родителя
             <input
               tuiTextfieldLegacy />
-            <tui-data-list-wrapper
-              *tuiDataList
-              [items]="['Учащийся', 'Тренер', 'Администратор']" />
-          </tui-select>
+          </tui-input-phone>
         </div>
+        }
         <div class="tui-form__buttons tui-form__buttons_align_center ">
           <button
             size="l"

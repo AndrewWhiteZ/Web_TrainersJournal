@@ -1,24 +1,21 @@
-import { tuiDialog, TuiDialogService, TuiRoot } from '@taiga-ui/core';
+import { TuiAlertService, tuiDialog, TuiRoot } from '@taiga-ui/core';
 import { FormsModule } from '@angular/forms';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { RouterLink } from '@angular/router';
-import {
-  TuiThemeColorService,
-} from '@taiga-ui/cdk';
 import {
   TuiButton,
   TuiDataList,
   TuiDropdown,
 } from '@taiga-ui/core';
 import {
-  TuiAvatar,
-  TuiSwitch,
   TuiTabs,
 } from '@taiga-ui/kit';
 import { TuiNavigation } from '@taiga-ui/layout';
 import { LoginDialogComponent } from './shared/components/login-dialog/login-dialog.component';
 import { UserService } from '../modules/users/services/user.service';
+import { UserEntity } from './shared/models/entity/user.entity';
+import { UserMapper } from './shared/models/mapper/user.mapper';
 
 @Component({
   selector: 'app-root',
@@ -28,12 +25,10 @@ import { UserService } from '../modules/users/services/user.service';
     TuiRoot,
     FormsModule,
     RouterLink,
-    TuiAvatar,
     TuiButton,
     TuiDataList,
     TuiDropdown,
     TuiNavigation,
-    TuiSwitch,
     TuiTabs,
   ],
   providers: [],
@@ -42,26 +37,36 @@ import { UserService } from '../modules/users/services/user.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
-  
-  private readonly theme = inject(TuiThemeColorService);
-  private readonly dialogs = inject(TuiDialogService);
+
+  private readonly alerts = inject(TuiAlertService);
+
   protected color = false;
+  protected currentUser: UserEntity | null = null;
+  protected profileDropdownState = false;
 
   constructor(private userService: UserService) {}
 
   ngOnInit(): void {
-    this.userService.authorize();
-  }
-
-  protected onColor(color: boolean): void {
-    this.theme.color = color ? 'gray' : 'black';
+    this.userService.me().subscribe({
+      next: (next) => { this.currentUser = UserMapper.mapToEntity(next.data) }
+    });
   }
 
   private readonly dialog = tuiDialog(LoginDialogComponent, {
     dismissible: true,
   });
 
-  protected showDialog(): void {
+  protected showLoginDialog(): void {
     this.dialog(0).subscribe();
+  }
+
+  logout(): void {
+    this.userService.logout().subscribe({
+      next: () => {
+        this.alerts.open(`Выполнен выход из аккаунта`, { appearance: "positive", label: "Успех", autoClose: 3000 }).subscribe();
+        this.profileDropdownState = false;
+      },
+      error: (error) => this.alerts.open(error.error.message, { appearance: "negative", label: "Ошибка", autoClose: 5000 }).subscribe()
+    });
   }
 }

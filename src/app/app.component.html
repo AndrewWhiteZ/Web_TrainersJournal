@@ -2,14 +2,6 @@
   <header tuiNavigationHeader>
     <button
       appearance="secondary-grayscale"
-      iconStart="@tui.user"
-      tuiButton
-      type="button"
-      routerLink="/login">
-      Авторизация
-    </button>
-    <button
-      appearance="secondary-grayscale"
       iconStart="@tui.home"
       tuiButton
       type="button"
@@ -48,16 +40,53 @@
       routerLink="/accounting">
       Взаиморасчеты
     </button>
-    <hr/>
-    <span tuiNavigationLogo>
-      Ночной режим
-      <input
-        tuiSwitch
-        type="checkbox"
-        [ngModel]="color"
-        (ngModelChange)="onColor($event)" />
-    </span>
-    <tui-avatar src="AI" routerLink="/profile" (click)="showDialog()"/>
+    <hr />
+    @if(currentUser) {
+    <button
+      appearance="secondary-grayscale"
+      iconStart="@tui.user"
+      tuiButton
+      tuiDropdownAlign="center"
+      type="button"
+      [tuiAppearanceState]="profileDropdownState ? 'active' : null"
+      [tuiDropdown]="profileDropdown"
+      [(tuiDropdownOpen)]="profileDropdownState">
+      Мой профиль
+    </button>
+    <ng-template
+      #profileDropdown
+      let-close>
+      <tui-data-list>
+        <tui-opt-group>
+          <button
+            tuiOption
+            type="button"
+            iconStart="@tui.user"
+            routerLink="/profile"
+            (click)="profileDropdownState = false">
+            {{ currentUser.fullName }}
+          </button>
+        </tui-opt-group>
+        <tui-opt-group>
+          <button
+            tuiOption
+            type="button"
+            (click)="logout()">
+            Выйти из профиля
+          </button>
+        </tui-opt-group>
+      </tui-data-list>
+    </ng-template>
+    } @else {
+    <button
+      appearance="secondary-grayscale"
+      iconStart="@tui.log-in"
+      tuiButton
+      type="button"
+      (click)="showLoginDialog()">
+      Войти
+    </button>
+    }
   </header>
   <main tuiNavigationMain style="padding: 12px;">
     <router-outlet></router-outlet>

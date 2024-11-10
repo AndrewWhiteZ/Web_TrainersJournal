@@ -1,14 +1,16 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TuiButton, TuiLabel, TuiTextfield, TuiIcon, TuiError, TuiDialogContext, TuiDataList, TuiDataListComponent, TuiSelect, TuiAlertService, TuiAlert } from '@taiga-ui/core';
+import { TuiButton, TuiLabel, TuiTextfield, TuiIcon, TuiError, TuiDialogContext, TuiDataList, TuiDataListComponent, TuiSelect, TuiAlertService, TuiAlert, tuiNumberFormatProvider, TuiCalendar } from '@taiga-ui/core';
 import { TuiPassword, TuiFieldErrorPipe, TuiTabs, TuiDataListWrapper } from '@taiga-ui/kit';
 import { SignInRequest } from '../../models/requests/sign-in-request';
 import { injectContext } from '@taiga-ui/polymorpheus';
 import { SignUpRequest } from '../../models/requests/sign-up-request';
-import { TuiInputPhoneModule, TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
+import { TuiInputDateModule, TuiInputNumberModule, tuiInputNumberOptionsProvider, TuiInputPhoneModule, TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { UserService } from '../../../../modules/users/services/user.service';
 import { UserRole } from '../../models/enum/user-role.enum';
+import { TUI_LAST_DAY, TuiDay } from '@taiga-ui/cdk';
+import { StudentSignUpRequest } from '../../models/requests/student-sign-up-request';
 
 export interface UserRoleSpec {
   apiName: string;
@@ -18,7 +20,7 @@ export interface UserRoleSpec {
 export function getUserRoleSpec(userRole: UserRole): UserRoleSpec {
   switch (userRole) {
     case UserRole.STUDENT: return { apiName: "STUDENT", name: "Учащийся" };
-    case UserRole.COACH: return { apiName: "COACH", name: "Тренер" };
+    case UserRole.TRAINER: return { apiName: "TRAINER", name: "Тренер" };
     case UserRole.ADMIN: return { apiName: "ADMIN", name: "Администратор" };
   }
 }
@@ -43,16 +45,27 @@ export function getUserRoleSpec(userRole: UserRole): UserRoleSpec {
     TuiDataList,
     TuiDataListWrapper,
     TuiInputPhoneModule,
+    TuiInputNumberModule,
+    TuiInputDateModule,
+    
   ],
   templateUrl: './login-dialog.component.html',
   styleUrl: './login-dialog.component.less',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    tuiNumberFormatProvider({
+      precision: 0,
+    }),
+    tuiInputNumberOptionsProvider({
+        step: 1,
+    }),
+  ]
 })
 export class LoginDialogComponent {
 
   public readonly context = injectContext<TuiDialogContext<null, number>>();
   protected activeTabIndex = 0;
-  protected userRoles: UserRole[] = [UserRole.ADMIN, UserRole.COACH, UserRole.STUDENT];
+  protected userRoles: UserRole[] = [UserRole.ADMIN, UserRole.TRAINER, UserRole.STUDENT];
 
   private readonly alerts = inject(TuiAlertService);
   private readonly userService = inject(UserService);
@@ -66,10 +79,14 @@ export class LoginDialogComponent {
   protected signUpForm = new FormGroup({
     loginValue: new FormControl('', Validators.required),
     fullNameValue: new FormControl('', Validators.required),
-    emailValue: new FormControl('', Validators.required),
+    emailValue: new FormControl('', Validators.email),
     phoneValue: new FormControl('88005553535', Validators.required),
     passwordValue: new FormControl('', Validators.required),
-    roleValue: new FormControl('', Validators.required)
+    roleValue: new FormControl('', Validators.required),
+    beltLevelValue: new FormControl(0),
+    birthDateValue: new FormControl(new TuiDay(2024, 11, 10)),
+    parentFullNameValue: new FormControl(''),
+    parentPhoneValue: new FormControl(''),
   });
 
   protected submitLogin(): void {
@@ -89,7 +106,7 @@ export class LoginDialogComponent {
   }
 
   protected submitSignUp(): void {
-    const request: SignUpRequest = {
+    const commonRequest: SignUpRequest = {
       login: this.signUpForm.controls.loginValue.value ?? "",
       fullName: this.signUpForm.controls.fullNameValue.value ?? "",
       email: this.signUpForm.controls.emailValue.value ?? "",
@@ -97,6 +114,17 @@ export class LoginDialogComponent {
       password: this.signUpForm.controls.passwordValue.value ?? "",
       role: getUserRoleSpec(this.signUpForm.controls.roleValue.value as UserRole).apiName ?? "",
     };
+
+    let request: SignUpRequest | StudentSignUpRequest = commonRequest;
+    if (this.signUpForm.controls.roleValue.value === UserRole.STUDENT) {
+      request = { 
+        ...commonRequest,
+        beltLevel: this.signUpForm.controls.beltLevelValue.value ?? 0,
+        birthDate: String(this.signUpForm.controls.birthDateValue.value?.toJSON()),
+        parentFullName: this.signUpForm.controls.parentFullNameValue.value ?? "",
+        parentPhone: this.signUpForm.controls.parentPhoneValue.value ?? "",
+      };
+    }
 
     this.userService.register(request).subscribe({
       next: (next) => {
