@@ -1,8 +1,164 @@
-<form [formGroup]="loginForm">
-  <tui-input-phone formControlName="phoneValue">
-      Type a phone number
-      <input
-          autocomplete="tel"
-      />
-  </tui-input-phone>
-</form>
+<div class="tui-container">
+  <form [formGroup]="activeTabIndex == 0 ? loginForm : signUpForm" (submit)="activeTabIndex == 0 ? submitLogin() : submitSignUp()" (reset)="reset()">
+    <div class="tui-row tui-row_sme">
+      <div class="tui-col_8">
+        <div class="tui-form__row">
+          <tui-tabs [(activeItemIndex)]="activeTabIndex">
+            <button
+              iconStart="@tui.log-in"
+              tuiTab
+              type="button">
+              Авторизация
+            </button>
+            <button
+              iconStart="@tui.at-sign"
+              tuiTab
+              type="button">
+              Регистрация
+            </button>
+          </tui-tabs>
+        </div>
+        @if (activeTabIndex === 0) {
+        <div class="tui-form__row">
+          <tui-input-phone formControlName="phoneValue">
+            Номер телефона
+            <input
+              autocomplete="tel"
+              tuiTextfieldLegacy
+            />
+          </tui-input-phone>
+        </div>
+        <div class="tui-form__field-note">Или</div>
+        <div class="tui-form__row">
+          <tui-textfield>
+            <label tuiLabel>Логин</label>
+            <input
+              tuiTextfield
+              autocomplete="nickname"
+              formControlName="loginValue" />
+            <tui-error
+              formControlName="loginValue"
+              [error]="[] | tuiFieldError | async" />
+            <tui-icon icon="@tui.key-round" />
+          </tui-textfield>
+        </div>
+        <div class="tui-form__row">
+          <tui-textfield>
+            <label tuiLabel>Пароль</label>
+            <input
+              tuiTextfield
+              type="password"
+              formControlName="passwordValue" />
+            <tui-icon tuiPassword />
+          </tui-textfield>
+        </div>
+        <div class="tui-form__buttons tui-form__buttons_align_center ">
+          <button
+            size="l"
+            tuiButton
+            type="submit"
+            class="tui-form__button">
+            Войти
+          </button>
+          <button
+            appearance="flat"
+            size="l"
+            tuiButton
+            type="reset"
+            class="tui-form__button">
+            Отмена
+          </button>
+        </div>
+        } @else {
+        <div class="tui-form__row">
+          <tui-textfield>
+            <label tuiLabel>Логин</label>
+            <input
+              tuiTextfield
+              autocomplete="username"
+              formControlName="loginValue" />
+            <tui-error
+              formControlName="loginValue"
+              [error]="[] | tuiFieldError | async" />
+          </tui-textfield>
+        </div>
+        <div class="tui-form__row">
+          <tui-textfield>
+            <label tuiLabel>Полное имя</label>
+            <input
+              tuiTextfield
+              autocomplete="name"
+              formControlName="fullNameValue" />
+            <tui-error
+              formControlName="fullNameValue"
+              [error]="[] | tuiFieldError | async" />
+          </tui-textfield>
+        </div>
+        <div class="tui-form__row">
+          <tui-textfield>
+            <label tuiLabel>Адрес электорнной почты</label>
+            <input
+              tuiTextfield
+              autocomplete="email"
+              formControlName="emailValue" />
+            <tui-error
+              formControlName="emailValue"
+              [error]="[] | tuiFieldError | async" />
+          </tui-textfield>
+        </div>
+        <div class="tui-form__row">
+          <tui-input-phone formControlName="phoneValue">
+            Номер телефона
+            <input
+              autocomplete="tel"
+              tuiTextfieldLegacy
+            />
+          </tui-input-phone>
+        </div>
+        <div class="tui-form__row">
+          <tui-textfield>
+            <label tuiLabel>Пароль</label>
+            <input
+              tuiTextfield
+              type="password"
+              formControlName="passwordValue" />
+            <tui-error
+              formControlName="passwordValue"
+              [error]="[] | tuiFieldError | async" />
+            <tui-icon tuiPassword />
+          </tui-textfield>
+        </div>
+        <div class="tui-form__row">
+          <tui-select
+            class="tui-space_vertical-4"
+            formControlName="roleValue">
+            Роль пользователя
+            <input
+              tuiTextfieldLegacy />
+            <tui-data-list-wrapper
+              *tuiDataList
+              [items]="['Учащийся', 'Тренер', 'Администратор']" />
+          </tui-select>
+        </div>
+        <div class="tui-form__buttons tui-form__buttons_align_center ">
+          <button
+            size="l"
+            tuiButton
+            type="submit"
+            class="tui-form__button">
+            Регистрация
+          </button>
+          <button
+            appearance="flat"
+            size="l"
+            tuiButton
+            type="reset"
+            class="tui-form__button">
+            Отмена
+          </button>
+        </div>
+        }
+      </div>
+    </div>
+  </form>
+</div>

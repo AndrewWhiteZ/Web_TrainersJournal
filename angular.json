@@ -71,10 +71,12 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "Web_TrainersJournal:build:production"
+              "buildTarget": "Web_TrainersJournal:build:production",
+              "proxyConfig": "proxy.conf.json"
             },
             "development": {
-              "buildTarget": "Web_TrainersJournal:build:development"
+              "buildTarget": "Web_TrainersJournal:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

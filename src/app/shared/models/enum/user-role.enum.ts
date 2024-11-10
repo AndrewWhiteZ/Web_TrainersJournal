@@ -1,5 +1,5 @@
 export enum UserRole {
-  STUDENT,
-  COACH,
-  ADMIN
+  STUDENT = "Учащийся",
+  COACH = "Тренер",
+  ADMIN = "Администратор",
 }

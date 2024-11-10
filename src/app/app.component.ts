@@ -1,38 +1,24 @@
-import { TUI_DIALOGS_CLOSE, tuiDialog, TuiDialogService, TuiRoot } from '@taiga-ui/core';
-import { KeyValuePipe, NgForOf } from '@angular/common';
+import { tuiDialog, TuiDialogService, TuiRoot } from '@taiga-ui/core';
 import { FormsModule } from '@angular/forms';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import ProfileComponent from '../modules/users/components/profile/profile.component';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import {
-  tuiAsPortal,
-  TuiPortals,
-  TuiRepeatTimes,
   TuiThemeColorService,
 } from '@taiga-ui/cdk';
 import {
-  TuiAppearance,
   TuiButton,
   TuiDataList,
   TuiDropdown,
-  TuiDropdownService,
-  TuiIcon,
-  TuiTitle,
 } from '@taiga-ui/core';
 import {
   TuiAvatar,
-  TuiBadge,
-  TuiBadgeNotification,
-  TuiChevron,
-  TuiDataListDropdownManager,
-  TuiFade,
   TuiSwitch,
   TuiTabs,
 } from '@taiga-ui/kit';
-import { TuiCardLarge, TuiHeader, TuiNavigation } from '@taiga-ui/layout';
+import { TuiNavigation } from '@taiga-ui/layout';
 import { LoginDialogComponent } from './shared/components/login-dialog/login-dialog.component';
-import {PolymorpheusComponent} from '@taiga-ui/polymorpheus';
+import { UserService } from '../modules/users/services/user.service';
 
 @Component({
   selector: 'app-root',
@@ -40,40 +26,32 @@ import {PolymorpheusComponent} from '@taiga-ui/polymorpheus';
   imports: [
     RouterOutlet,
     TuiRoot,
-    ProfileComponent,
     FormsModule,
-    KeyValuePipe,
-    NgForOf,
     RouterLink,
-    RouterLinkActive,
-    TuiAppearance,
     TuiAvatar,
-    TuiBadge,
-    TuiBadgeNotification,
     TuiButton,
-    TuiCardLarge,
-    TuiChevron,
     TuiDataList,
-    TuiDataListDropdownManager,
     TuiDropdown,
-    TuiFade,
-    TuiHeader,
-    TuiIcon,
     TuiNavigation,
-    TuiRepeatTimes,
     TuiSwitch,
     TuiTabs,
-    TuiTitle,
   ],
   providers: [],
   templateUrl: './app.component.html',
   styleUrl: './app.component.less',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  
   private readonly theme = inject(TuiThemeColorService);
   private readonly dialogs = inject(TuiDialogService);
   protected color = false;
+
+  constructor(private userService: UserService) {}
+
+  ngOnInit(): void {
+    this.userService.authorize();
+  }
 
   protected onColor(color: boolean): void {
     this.theme.color = color ? 'gray' : 'black';
@@ -81,17 +59,9 @@ export class AppComponent {
 
   private readonly dialog = tuiDialog(LoginDialogComponent, {
     dismissible: true,
-    label: 'Heading',
   });
 
   protected showDialog(): void {
-    this.dialog().subscribe({
-      next: (data) => {
-        console.info(`Dialog emitted data = ${data}`);
-      },
-      complete: () => {
-        console.info('Dialog closed');
-      },
-    });
+    this.dialog(0).subscribe();
   }
 }

@@ -6,6 +6,7 @@ import { UserEntity } from '../../../app/shared/models/entity/user.entity';
 import { ApiResponse } from '../../../app/shared/models/response/api.response';
 import { UserDto } from '../../../app/shared/models/dto/user.dto';
 import { UserMapper } from '../../../app/shared/models/mapper/user.mapper';
+import { EmptyResponse } from '../../../app/shared/models/response/empty.response';
 
 @Injectable({
   providedIn: 'root'
@@ -24,19 +25,19 @@ export class UserService {
     })
   }  
   public register(body: SignUpRequest) {
-    return this.http.post("/register", body);
+    return this.http.post<ApiResponse<UserDto>>("/api/v1/register", body);
   }
 
   public login(body: SignInRequest) {
-    return this.http.post("/login", body);
+    return this.http.post<ApiResponse<UserDto>>("/api/v1/login", body);
   }
 
   public logout() {
-    return this.http.post("/logout", null);
+    return this.http.post<EmptyResponse>("/api/v1/logout", null);
   }
 
   public me() {
-    return this.http.get<ApiResponse<UserDto>>("/me");
+    return this.http.get<ApiResponse<UserDto>>("/api/v1/me");
   }
 
 }
