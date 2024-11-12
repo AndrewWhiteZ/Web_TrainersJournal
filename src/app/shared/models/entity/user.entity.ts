@@ -7,8 +7,4 @@ export interface UserEntity {
   email: string;
   phone: string;
   role: UserRole;
-  beltLevel: number | null,
-  birthDate: Date | null,
-  parentFullName: string | null,
-  parentPhone: string | null,
 }

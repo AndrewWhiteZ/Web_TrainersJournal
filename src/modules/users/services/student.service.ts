@@ -9,11 +9,11 @@ export class StudentService {
   constructor(private http: HttpClient) { }
 
   public getStudents() {
-    return this.http.get("/students");
+    return this.http.get("/api/v1/students");
   }
 
   public getStudentById(id: String) {
-    return this.http.get(`/students/${id}`);
+    return this.http.get(`/api/v1/students/${id}`);
   }
 
 }

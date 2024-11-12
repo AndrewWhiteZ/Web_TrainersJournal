@@ -1,10 +1,40 @@
-import { Component, inject } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { TuiAlertService, TuiAppearance, TuiButton, TuiDialogService, TuiIcon, TuiTextfield, TuiTitle } from '@taiga-ui/core';
-import { TUI_CONFIRM, TuiAccordion, TuiAccordionItem, TuiAvatar, TuiButtonGroup, TuiConfirmData } from '@taiga-ui/kit';
+import {
+  TuiAlertService,
+  TuiAppearance,
+  TuiButton,
+  TuiDialogContext,
+  TuiDialogService,
+  TuiError,
+  TuiIcon,
+  TuiTextfield,
+  TuiTitle,
+} from '@taiga-ui/core';
+import {
+  TUI_CONFIRM,
+  TuiAccordion,
+  TuiAccordionItem,
+  TuiAvatar,
+  TuiButtonGroup,
+  TuiConfirmData,
+  TuiFieldErrorPipe,
+} from '@taiga-ui/kit';
 import { TuiCardLarge, TuiHeader, TuiSearch } from '@taiga-ui/layout';
 import { switchMap } from 'rxjs';
+import { GroupService } from '../../services/group.service';
+import { GroupEntity } from '../../../../app/shared/models/entity/group.entity';
+import { GroupMapper } from '../../../../app/shared/models/mapper/group.mapper';
+import type { PolymorpheusContent } from '@taiga-ui/polymorpheus';
+import { AsyncPipe } from '@angular/common';
+import { TuiInputModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
+import { CreateGroupRequest } from '../../../../app/shared/models/requests/create-group-request';
 
 @Component({
   selector: 'app-group-list',
@@ -25,49 +55,97 @@ import { switchMap } from 'rxjs';
     TuiIcon,
     RouterLink,
     RouterLinkActive,
+    TuiError,
+    TuiFieldErrorPipe,
+    AsyncPipe,
+    TuiInputModule,
+    TuiTextfieldControllerModule,
   ],
   templateUrl: './group-list.component.html',
-  styleUrl: './group-list.component.less'
+  styleUrl: './group-list.component.less',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GroupListComponent {
-
-  constructor(private router: Router) {}
-
+export class GroupListComponent implements OnInit {
+  
   private readonly dialogs = inject(TuiDialogService);
   private readonly alerts = inject(TuiAlertService);
 
-  protected readonly searchForm = new FormGroup({
-    search: new FormControl()
+  constructor(private router: Router, private groupService: GroupService) {}
+
+  protected groups: Array<GroupEntity> = new Array();
+  protected selectedGroup: GroupEntity | null = null;
+
+  protected readonly createGroupForm = new FormGroup({
+    nameValue: new FormControl('', { validators: [Validators.required], nonNullable: true } ),
   });
 
-  selectedGroup: String | null = null;
+  protected readonly searchForm = new FormGroup({
+    search: new FormControl(),
+  });
 
-  groups = Array("ГД-000001", "ГД-000002", "ГД-000003");
-  students = Array("Joanne Martin", "Julio Brown", "Wayne Martin", "Eric Howell", "Dorothy Johnson", "Stanley Harris", "Anna Morgan");
+  ngOnInit(): void {
+    this.groupService.getGroups().subscribe({
+      next: (next) => {
+        next.data.map((groupDto) => this.groups.push(GroupMapper.mapToEntity(groupDto))
+      )},
+    });
+  }
 
-  selectGroup(selectedGroup: String) {
+  students = Array(
+    'Joanne Martin',
+    'Julio Brown',
+    'Wayne Martin',
+    'Eric Howell',
+    'Dorothy Johnson',
+    'Stanley Harris',
+    'Anna Morgan'
+  );
+
+  selectGroup(selectedGroup: GroupEntity) {
     this.selectedGroup = selectedGroup;
   }
 
   approveGroupDeletion() {
     const data: TuiConfirmData = {
-      content: `Вы действительно хотите удалить группу ${this.selectedGroup}?`,
+      content: `Вы действительно хотите удалить группу <b>${this.selectedGroup?.name}</b>?`,
       yes: 'Да',
       no: 'Отмена',
     };
 
     this.dialogs
-        .open<boolean>(TUI_CONFIRM, {
-            label: 'Подтвердите действие',
-            size: 's',
-            data,
-        })
-        .pipe(switchMap((response) => this.alerts.open(String(response))))
-        .subscribe();
+      .open<boolean>(TUI_CONFIRM, {
+        label: 'Подтвердите действие',
+        size: 's',
+        data,
+      })
+      .subscribe({
+        next: () => this.deleteGroup() 
+      });
+  }
+
+  private deleteGroup() {
+    this.alerts.open('Not implemented yet').subscribe();
   }
 
   changeRoute(route: String) {
     this.router.navigate(['group/', route]);
   }
 
+  protected showDialog(content: PolymorpheusContent<TuiDialogContext>): void {
+    this.dialogs.open(content, { label: 'Новая группа' }).subscribe();
+  }
+
+  createGroup(observer: any) {
+    const request: CreateGroupRequest = {
+      name: this.createGroupForm.controls.nameValue.value
+    };
+
+    this.groupService.createGroup(request).subscribe({
+      next: () => {
+        this.alerts.open(`Группа <b>${request.name}</b> успешно создана`, { autoClose: 3000, label: 'Успех', appearance: 'positive' }).subscribe();
+        observer.complete();
+      },
+      error: (error) => this.alerts.open(error, { autoClose: 5000, label: 'Ошибка', appearance: 'negative' }).subscribe(),
+    });
+  }
 }

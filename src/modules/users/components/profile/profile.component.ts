@@ -76,4 +76,12 @@ export default class ProfileComponent extends TuiPortals implements OnInit {
       next: (next) => { this.currentUser = UserMapper.mapToEntity(next.data) }
     });
   }
+
+  getUserAdditionalProperty(propertyName: string) {
+    if (this.currentUser) {
+      return (this.currentUser as any)[propertyName];
+    } else {
+      return '';
+    }
+  }
 }

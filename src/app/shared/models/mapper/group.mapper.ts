@@ -8,7 +8,7 @@ export class GroupMapper {
     return {
       id: dto.id,
       name: dto.name,
-      coach: CoachMapper.mapToEntity(dto.trainer),
+      coach: dto.trainer !== null ? CoachMapper.mapToEntity(dto.trainer) : null,
       students: new Array,
     }
   }

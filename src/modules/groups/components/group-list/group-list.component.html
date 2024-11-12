@@ -3,6 +3,7 @@
     <search tuiSearch>
       <form [formGroup]="searchForm">
         <fieldset tuiTextfieldSize="m">
+         
           <tui-textfield iconStart="@tui.search">
             <input
               formControlName="search"
@@ -11,60 +12,112 @@
           </tui-textfield>
           <button
             size="m"
-            tuiButton
-            type="button">
+            tuiIconButton
+            iconStart="@tui.search"
+            appearance="secondary"
+            type="button"
+            [style.border-radius.%]="100">
             Поиск
+          </button>
+          <button
+            size="m"
+            tuiButton
+            iconStart="@tui.circle-plus"
+            appearance="positive"
+            type="button"
+            (click)="showDialog(createGroupTemplate)">
+            Создать
           </button>
         </fieldset>
       </form>
     </search>
     <tui-accordion class="container" style="margin-top: 16px;">
-      @for (group of groups; track $index) {
-      <tui-accordion-item [showArrow]="false" (click)="selectGroup(group)" (dblclick)="changeRoute(group)"
+      @for (group of this.groups; track $index) {
+      <tui-accordion-item [showArrow]="false" (click)="selectGroup(group)"
+        (dblclick)="changeRoute(group.id)"
         [style.background]="(group == selectedGroup) ? 'AliceBlue' : ''">
-        {{ group }}
+        {{ group.name }}
       </tui-accordion-item>
       }
     </tui-accordion>
   </div>
+  @if(selectedGroup !== null) {
   <div
     tuiAppearance="floating"
     tuiCardLarge
     style="width: 25%;">
     <header tuiHeader>
       <h1 tuiTitle>
-        {{ selectedGroup ?? "Группа не выбрана" }}
-        <span tuiSubtitle>{{ students.length }} учащихся</span>
+        <div tuiCaption>Группа</div>
+        {{ selectedGroup.name }}
       </h1>
       <aside tuiAccessories>
         <tui-avatar
           appearance="primary"
-          src="@tui.star" />
+          size="m"
+          src="@tui.users-round" />
       </aside>
     </header>
-    <main>
-      <ol class="tui-list tui-list_large tui-list_ordered">
-        @for (student of students; track $index) {
-        <li class="tui-list__item">{{ student }}</li>
-        }
-      </ol>
-    </main>
     <footer>
       <div
         tuiAppearance="floating"
         tuiButtonGroup>
         <button
           type="button"
-          [routerLink]="'/group/' + selectedGroup">
-          <tui-icon icon="@tui.pencil"/>
+          [routerLink]="'/group/' + selectedGroup.id">
+          <tui-icon icon="@tui.pencil" />
           Изменить
         </button>
         <button type="button"
           (click)="approveGroupDeletion()">
-          <tui-icon icon="@tui.circle-x"/>
+          <tui-icon icon="@tui.circle-x" />
           Удалить
         </button>
       </div>
     </footer>
   </div>
+  }
 </div>
+
+<ng-template
+  #createGroupTemplate
+  let-observer>
+  <form [formGroup]="createGroupForm" (submit)="createGroup(observer)">
+    <div class="tui-row tui-row_sme">
+      <div class="tui-col_8">
+        <div class="tui-form__row">
+          <tui-input
+            formControlName="nameValue"
+            tuiHintContent="A tooltip">
+            Название
+            <input
+              placeholder="ГД-000001"
+              tuiTextfieldLegacy />
+            <span class="tui-required"></span>
+          </tui-input>
+          <tui-error
+            formControlName="nameValue"
+            [error]="[] | tuiFieldError | async" />
+        </div>
+      </div>
+    </div>
+    <div class="tui-form__buttons">
+      <button
+        size="l"
+        tuiButton
+        type="submit"
+        class="tui-form__button">
+        Создать
+      </button>
+      <button
+        appearance="flat"
+        size="l"
+        tuiButton
+        type="button"
+        class="tui-form__button"
+        (click)="observer.complete()">
+        Отмена
+      </button>
+    </div>
+  </form>
+</ng-template>

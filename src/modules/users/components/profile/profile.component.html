@@ -33,25 +33,25 @@
       <section class="actions">
         <div tuiCell="l" tuiHeader="s">
           <div tuiTitle>
-            {{ currentUser!.parentFullName }}
+            {{ getUserAdditionalProperty('parentFullName') }}
             <div tuiSubtitle>Родитель</div>
           </div>
         </div>
         <div tuiCell="l" tuiHeader="s">
           <div tuiTitle>
-            {{ currentUser!.birthDate }}
+            {{ getUserAdditionalProperty('birthDate') }}
             <div tuiSubtitle>Дата рождения</div>
           </div>
         </div>
         <div tuiCell="l" tuiHeader="s">
           <div tuiTitle>
-            {{ currentUser!.parentPhone }}
+            {{ getUserAdditionalProperty('parentPhone') }}
             <div tuiSubtitle>Телефон родителя</div>
           </div>
         </div>
         <div tuiCell="l" tuiHeader="s">
           <div tuiTitle>
-            {{ currentUser!.beltLevel }}
+            {{ getUserAdditionalProperty('beltLevel') }}
             <div tuiSubtitle>Пояс</div>
           </div>
         </div>
