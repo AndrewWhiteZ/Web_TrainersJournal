@@ -5,6 +5,7 @@ import { SignInRequest } from '../../../app/shared/models/requests/sign-in-reque
 import { ApiResponse } from '../../../app/shared/models/response/api.response';
 import { UserDto } from '../../../app/shared/models/dto/user.dto';
 import { EmptyResponse } from '../../../app/shared/models/response/empty.response';
+import { StudentDto } from '../../../app/shared/models/dto/student.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +27,7 @@ export class UserService {
   }
 
   public me() {
-    return this.http.get<ApiResponse<UserDto>>("/api/v1/me");
+    return this.http.get<ApiResponse<UserDto|StudentDto>>("/api/v1/me");
   }
 
 }

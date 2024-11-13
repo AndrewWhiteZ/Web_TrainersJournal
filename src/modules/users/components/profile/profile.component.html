@@ -8,7 +8,8 @@
       </h2>
       <div tuiAccessories>
         <tui-avatar
-          [src]="currentUser!.fullName.split(' ')[1][0] + currentUser!.fullName.split(' ')[2][0]"
+          [src]="currentUser!.fullName | tuiInitials"
+          [style.background]="currentUser!.fullName | tuiAutoColor" 
           size="xxl" />
       </div>
     </header>

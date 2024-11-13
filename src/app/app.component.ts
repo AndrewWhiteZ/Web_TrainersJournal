@@ -1,7 +1,7 @@
 import { TuiAlertService, tuiDialog, TuiRoot } from '@taiga-ui/core';
 import { FormsModule } from '@angular/forms';
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { RouterLink } from '@angular/router';
 import {
   TuiButton,
@@ -44,7 +44,10 @@ export class AppComponent implements OnInit {
   protected currentUser: UserEntity | null = null;
   protected profileDropdownState = false;
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private router: Router,
+    private userService: UserService
+  ) {}
 
   ngOnInit(): void {
     this.userService.me().subscribe({
@@ -65,6 +68,8 @@ export class AppComponent implements OnInit {
       next: () => {
         this.alerts.open(`Выполнен выход из аккаунта`, { appearance: "positive", label: "Успех", autoClose: 3000 }).subscribe();
         this.profileDropdownState = false;
+        this.currentUser = null;
+        this.router.navigate(['/']);
       },
       error: (error) => this.alerts.open(error.error.message, { appearance: "negative", label: "Ошибка", autoClose: 5000 }).subscribe()
     });
