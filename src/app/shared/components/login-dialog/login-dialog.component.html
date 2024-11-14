@@ -1,9 +1,9 @@
-<div class="tui-container">
+<div>
   <form [formGroup]="activeTabIndex == 0 ? loginForm : signUpForm"
     (submit)="activeTabIndex == 0 ? submitLogin() : submitSignUp()"
     (reset)="reset()">
     <div class="tui-row tui-row_sme">
-      <div class="tui-col_8">
+      <div class="tui-col_12">
         <div class="tui-form__row">
           <tui-tabs [(activeItemIndex)]="activeTabIndex">
             <button
@@ -21,15 +21,6 @@
           </tui-tabs>
         </div>
         @if (activeTabIndex === 0) {
-        <div class="tui-form__row">
-          <tui-input-phone formControlName="phoneValue">
-            Номер телефона
-            <input
-              autocomplete="tel"
-              tuiTextfieldLegacy />
-          </tui-input-phone>
-        </div>
-        <div class="tui-form__field-note">Или</div>
         <div class="tui-form__row">
           <tui-textfield>
             <label tuiLabel>Логин</label>
@@ -72,16 +63,12 @@
         </div>
         } @else {
         <div class="tui-form__row">
-          <tui-select
-            class="tui-space_vertical-4"
-            formControlName="roleValue">
-            Роль пользователя
-            <input
-              tuiTextfieldLegacy />
-            <tui-data-list-wrapper
-              *tuiDataList
-              [items]="userRoles" />
-          </tui-select>
+          <tui-radio-list
+            [items]="userRoles"
+            [style.flex-direction]="'row'"
+            [style.width]="'max-content'"
+            formControlName="roleValue"
+          />
         </div>
         <div class="tui-form__row">
           <tui-textfield>
