@@ -30,7 +30,8 @@ import { UserMapper } from './shared/models/mapper/user.mapper';
     TuiDropdown,
     TuiNavigation,
     TuiTabs,
-  ],
+      TuiRoot
+],
   providers: [],
   templateUrl: './app.component.html',
   styleUrl: './app.component.less',

@@ -11,6 +11,7 @@ import { UserService } from '../../../../modules/users/services/user.service';
 import { UserRole } from '../../models/enum/user-role.enum';
 import { TUI_LAST_DAY, TuiDay } from '@taiga-ui/cdk';
 import { StudentSignUpRequest } from '../../models/requests/student-sign-up-request';
+import { TuiSearch } from '@taiga-ui/layout';
 
 export interface UserRoleSpec {
   apiName: string;
@@ -47,7 +48,7 @@ export function getUserRoleSpec(userRole: UserRole): UserRoleSpec {
     TuiInputPhoneModule,
     TuiInputNumberModule,
     TuiInputDateModule,
-    
+    TuiSearch,
   ],
   templateUrl: './login-dialog.component.html',
   styleUrl: './login-dialog.component.less',
