@@ -1,0 +1,92 @@
+<search tuiSearch>
+  <form [formGroup]="searchForm">
+    <fieldset tuiTextfieldSize="m">
+      <tui-textfield iconStart="@tui.search">
+        <input
+          formControlName="search"
+          placeholder="Название группы"
+          tuiTextfield
+          (click)="showSelectionDialog()"
+        />
+      </tui-textfield>
+      <button
+        size="m"
+        tuiIconButton
+        iconStart="@tui.search"
+        appearance="secondary"
+        type="button"
+        [style.border-radius.%]="100"
+      >
+        Поиск
+      </button>
+      <button
+        size="m"
+        tuiButton
+        iconStart="@tui.circle-plus"
+        appearance="positive"
+        type="button"
+        (click)="showDialog(createLessonTemplate)"
+      >
+        Создать
+      </button>
+    </fieldset>
+  </form>
+</search>
+<div tuiAppearance="floating" tuiCardLarge tuiConnected>
+  <h3 tuiTitle="m">17 ноября 2024 (Воскресенье)</h3>
+  @for (item of items; track $index) {
+  <button tuiCell type="button" (click)="showSelectionDialog()">
+    <tui-avatar appearance="accent" [src]="item.icon" />
+    <span tuiTitle>
+      {{ item.title }}
+      <span tuiSubtitle>{{ item.subtitle }}</span>
+    </span>
+  </button>
+  }
+</div>
+
+<ng-template #createLessonTemplate let-observer>
+  <form [formGroup]="createLessonGroup" (submit)="createLesson(observer)">
+    <h3 class="tui-form__header"></h3>
+    <div class="tui-row tui-row_sme">
+      <div class="tui-col_12">
+        <div class="tui-form__row">
+          <tui-input-date
+            formControlName="date"
+            tuiUnfinishedValidator="Finish filling the field"
+          >
+            Дата занятия
+            <input tuiTextfieldLegacy />
+          </tui-input-date>
+        </div>
+        <div class="tui-form__row tui-form__row_multi-fields">
+          <div class="tui-form__multi-field">
+            <tui-input-time formControlName="startTime" timeMode="HH:MM">
+              Время начала занятия
+            </tui-input-time>
+          </div>
+          <div class="tui-form__multi-field">
+            <tui-input-time formControlName="endTime" timeMode="HH:MM">
+              Время окончания занятия
+            </tui-input-time>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tui-form__buttons">
+      <button size="l" tuiButton type="submit" class="tui-form__button">
+        Создать
+      </button>
+      <button
+        appearance="flat"
+        size="l"
+        tuiButton
+        type="button"
+        class="tui-form__button"
+        (click)="observer.complete()"
+      >
+        Отмена
+      </button>
+    </div>
+  </form>
+</ng-template>

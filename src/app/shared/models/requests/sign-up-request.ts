@@ -1,8 +1,8 @@
 export interface SignUpRequest {
-  email: String,
-  fullName: String,
-  login: String,
-  password: String,
-  phone: String,
-  role: String,
+  email: string,
+  fullName: string,
+  login: string,
+  password: string,
+  phone: string,
+  role: string,
 }

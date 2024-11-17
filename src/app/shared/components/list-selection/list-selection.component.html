@@ -1,0 +1,36 @@
+<form [formGroup]="chooseForm">
+  <h3 class="tui-form__header"></h3>
+  <tui-accordion>
+    @for (item of items; track $index) {
+    <tui-accordion-item
+      [showArrow]="false"
+      (click)="selectItem(item)"
+      (dblclick)="chooseItem(item)"
+      [style.background]="item == selectedItem ? 'AliceBlue' : ''"
+    >
+      {{ item.name }}
+    </tui-accordion-item>
+    }
+  </tui-accordion>
+  <div class="tui-form__buttons tui-form__buttons_align_end">
+    <button
+      tuiButton
+      type="button"
+      appearance="flat"
+      (click)="chooseItem(null)"
+      class="tui-form__button"
+    >
+      Отмена
+    </button>
+    <button
+      tuiButton
+      type="button"
+      [disabled]="!selectedItem"
+      appearance="primary"
+      (click)="chooseItem()"
+      class="tui-form__button"
+    >
+      Выбрать
+    </button>
+  </div>
+</form>

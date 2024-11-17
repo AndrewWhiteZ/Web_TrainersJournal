@@ -41,11 +41,11 @@ export class FacadeService {
     return this.groupService.getMyGroups();
   }
 
-  public getGroupById(id: String) {
+  public getGroupById(id: string) {
     return this.groupService.getGroupById(id);
   }
 
-  public getGroupStudentsById(id: String) {
+  public getGroupStudentsById(id: string) {
     return this.groupService.getGroupStudentsById(id);
   }
 
@@ -53,11 +53,11 @@ export class FacadeService {
     return this.groupService.createGroup(body);
   }
 
-  public addStudentToGroup(groupId: String, studentId: String) {
+  public addStudentToGroup(groupId: string, studentId: string) {
     return this.groupService.addStudent(groupId, studentId);
   }
 
-  public removeStudentFromGroup(groupId: String, studentId: String) {
+  public removeStudentFromGroup(groupId: string, studentId: string) {
     return this.groupService.removeStudent(groupId, studentId);
   }
 
@@ -65,7 +65,7 @@ export class FacadeService {
     return this.studentService.getStudents();
   }
 
-  public getStudentById(id: String) {
+  public getStudentById(id: string) {
     return this.studentService.getStudentById(id);
   }
 
