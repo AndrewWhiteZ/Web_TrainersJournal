@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TuiAlertService, TuiAppearance, TuiButton, tuiDateFormatProvider, tuiDialog, TuiDialogContext, TuiDialogService, TuiError, TuiNotification, TuiTextfield, TuiTitle } from '@taiga-ui/core';
-import { TuiAvatar, TuiConnected, TuiDataListWrapper, TuiFieldErrorPipe } from '@taiga-ui/kit';
-import { TuiCardLarge, TuiCell, TuiSearch } from '@taiga-ui/layout';
+import { TuiAlertService, TuiAppearance, TuiButton, tuiDateFormatProvider, tuiDialog, TuiDialogContext, TuiDialogService, TuiDialogSize, TuiError, TuiIcon, TuiNotification, TuiTextfield, TuiTitle } from '@taiga-ui/core';
+import { TuiAvatar, TuiBadge, TuiBadgedContent, TuiConnected, TuiDataListWrapper, TuiFieldErrorPipe, TuiTabs } from '@taiga-ui/kit';
+import { TuiBlockStatus, TuiCardLarge, TuiCell, TuiHeader, TuiSearch } from '@taiga-ui/layout';
 import { TuiInputDateModule, TuiInputModule, TuiInputTimeModule, TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { ListSelectionComponent } from '../../../../app/shared/components/list-selection/list-selection.component';
 import { LessonService } from '../../services/lesson.service';
@@ -15,6 +15,14 @@ import { TuiDay, TuiTime } from '@taiga-ui/cdk';
 import { GroupEntity } from '../../../../app/shared/models/entity/group.entity';
 import { ScheduleLessonRequest } from '../../../../app/shared/models/requests/schedule-lesson.request';
 import { GroupMapper } from '../../../../app/shared/models/mapper/group.mapper';
+import { LessonEntity } from '../../../../app/shared/models/entity/lesson.entity';
+import { LessonMapper } from '../../../../app/shared/models/mapper/lesson.mapper';
+
+type ScheduledLesson = {
+  day: number,
+  startTime: TuiTime,
+  endTime: TuiTime,
+}
 
 @Component({
   selector: 'app-schedule',
@@ -40,6 +48,12 @@ import { GroupMapper } from '../../../../app/shared/models/mapper/group.mapper';
     TuiButton,
     TuiInputDateModule,
     TuiInputTimeModule,
+    TuiBlockStatus,
+    TuiHeader,
+    TuiIcon,
+    TuiTabs,
+    TuiBadge,
+    TuiBadgedContent,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.less',
@@ -71,7 +85,11 @@ export class ScheduleComponent {
 
   protected value = this.items[0]!;
 
+  protected lessons: Array<LessonEntity> = new Array;
   protected selectedGroup: GroupEntity | null = null;
+
+  protected sheduledLessons: Array<ScheduledLesson> = new Array;
+  protected activeDayIndex: number = 0;
 
   constructor(
     private facadeService: FacadeService,
@@ -88,6 +106,12 @@ export class ScheduleComponent {
     endTime: new FormControl(TuiTime.currentLocal(), { nonNullable: true }),
   });
 
+  protected readonly scheduleLessonsGroup = new FormGroup({
+    startTime: new FormControl(TuiDay.currentLocal(), { nonNullable: true }),
+    endTime: new FormControl(TuiDay.currentLocal(), { nonNullable: true }),
+    scheduledLessons: new FormControl(Array<ScheduledLesson>),
+  });
+
   private readonly dialog = tuiDialog(ListSelectionComponent<GroupDto>, {
     dismissible: true,
     label: 'Выберите группу',
@@ -101,12 +125,15 @@ export class ScheduleComponent {
       next: (next) => {
         this.selectedGroup = next ? GroupMapper.mapToEntity(next) : null;
         this.searchForm.controls.search.setValue(this.selectedGroup?.name);
+        if (this.selectedGroup) {
+          this.getLessonsByGroup(this.selectedGroup);
+        }
       }
     });
   }
 
-  protected showDialog(content: PolymorpheusContent<TuiDialogContext>): void {
-    this.dialogs.open(content, { label: 'Новое занятие' }).subscribe();
+  protected showDialog(content: PolymorpheusContent<TuiDialogContext>, label: string, size: TuiDialogSize): void {
+    this.dialogs.open(content, { label, size }).subscribe();
   }
 
   protected createLesson(observer: any) {
@@ -134,5 +161,23 @@ export class ScheduleComponent {
       },
       error: (error) => this.alerts.open(error, { autoClose: 5000, label: 'Ошибка', appearance: 'negative' }).subscribe()
     });
+  }
+
+  protected getLessonsByGroup(group: GroupEntity) {
+    this.lessonService.getLessonsByGroup(group.id).subscribe({
+      next: (next) => {
+        this.lessons = new Array;
+        next.data.map((item) => this.lessons.push(LessonMapper.mapToEntity(item)))
+      }
+    });
+  }
+
+  protected addLesson(dayIndex: number) {
+    const lesson: ScheduledLesson = {
+      day:  dayIndex,
+      startTime: TuiTime.currentLocal(),
+      endTime: TuiTime.currentLocal(),
+    };
+    this.sheduledLessons.push(lesson);
   }
 }

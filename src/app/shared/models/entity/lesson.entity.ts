@@ -1,4 +1,4 @@
-export interface GroupEntity {
+export interface LessonEntity {
   id: string;
   startTime: Date;
   endTime: Date;
