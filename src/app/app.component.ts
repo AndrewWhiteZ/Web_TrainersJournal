@@ -1,8 +1,9 @@
-import { TuiAlertService, tuiDialog, TuiRoot } from '@taiga-ui/core';
+import { TuiAlertService, tuiDateFormatProvider, tuiDialog, TuiRoot } from '@taiga-ui/core';
 import { FormsModule } from '@angular/forms';
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, LOCALE_ID, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { RouterLink } from '@angular/router';
+import { registerLocaleData } from '@angular/common';
 import {
   TuiButton,
   TuiDataList,
@@ -16,6 +17,8 @@ import { LoginDialogComponent } from './shared/components/login-dialog/login-dia
 import { UserService } from '../modules/users/services/user.service';
 import { UserEntity } from './shared/models/entity/user.entity';
 import { UserMapper } from './shared/models/mapper/user.mapper';
+import localeRu from '@angular/common/locales/ru';
+registerLocaleData(localeRu);
 
 @Component({
   selector: 'app-root',
@@ -30,9 +33,12 @@ import { UserMapper } from './shared/models/mapper/user.mapper';
     TuiDropdown,
     TuiNavigation,
     TuiTabs,
-      TuiRoot
+    TuiRoot
 ],
-  providers: [],
+  providers: [
+    tuiDateFormatProvider({ mode: 'DMY', separator: '.' }),
+    { provide: LOCALE_ID, useValue: 'ru-RU'},
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.less',
   changeDetection: ChangeDetectionStrategy.OnPush,

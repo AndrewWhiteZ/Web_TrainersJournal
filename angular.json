@@ -20,6 +20,7 @@
             "outputPath": "dist/web-trainers-journal",
             "index": "src/index.html",
             "browser": "src/main.ts",
+            "localize": true,
             "polyfills": [
               "zone.js"
             ],
@@ -46,6 +47,7 @@
           },
           "configurations": {
             "production": {
+              "localize": ["ru"],
               "budgets": [
                 {
                   "type": "initial",
