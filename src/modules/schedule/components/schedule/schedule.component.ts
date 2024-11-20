@@ -17,11 +17,13 @@ import { ScheduleLessonRequest } from '../../../../app/shared/models/requests/sc
 import { GroupMapper } from '../../../../app/shared/models/mapper/group.mapper';
 import { LessonEntity } from '../../../../app/shared/models/entity/lesson.entity';
 import { LessonMapper } from '../../../../app/shared/models/mapper/lesson.mapper';
+import { ScheduleBatchRequest } from '../../../../app/shared/models/requests/schedule-batch.request';
+import { ScheduledLessonDto } from '../../../../app/shared/models/dto/scheduled-lesson.dto';
 
 type ScheduledLesson = {
   day: number,
-  startTime: TuiTime,
-  endTime: TuiTime,
+  startTime: Date,
+  endTime: Date,
 }
 
 type LessonByDay = {
@@ -95,7 +97,7 @@ export class ScheduleComponent {
   protected lessonsByDays: Array<LessonByDay> = new Array;
   protected selectedGroup: GroupEntity | null = null;
 
-  protected sheduledLessons: Array<ScheduledLesson> = new Array;
+  protected scheduledLessons: Array<ScheduledLesson> = new Array;
   protected activeDayIndex: number = 0;
 
   constructor(
@@ -119,12 +121,17 @@ export class ScheduleComponent {
     scheduledLessons: new FormControl(Array<ScheduledLesson>),
   });
 
+  protected readonly scheduleLessonGroup = new FormGroup({
+    startTime: new FormControl(TuiTime.currentLocal(), { nonNullable: true }),
+    endTime: new FormControl(TuiTime.currentLocal(), { nonNullable: true }),
+  });
+
   private readonly dialog = tuiDialog(ListSelectionComponent<GroupDto>, {
     dismissible: true,
     label: 'Выберите группу',
     size: 'fullscreen'
   });
-
+  
   protected showSelectionDialog(): void {
     const observe = this.facadeService.getGroups();
     this.dialog(observe).subscribe({
@@ -139,15 +146,12 @@ export class ScheduleComponent {
     });
   }
 
-  protected showDialog(content: PolymorpheusContent<TuiDialogContext>, label: string, size: TuiDialogSize): void {
+  protected showDialog(content: PolymorpheusContent<TuiDialogContext>, label: string, size: TuiDialogSize) {
     this.dialogs.open(content, { label, size }).subscribe();
   }
 
   protected createLesson(observer: any) {
-    
-    if (!this.selectedGroup) {
-      return;
-    }
+    if (!this.selectedGroup) return;
 
     const dateValue = this.createLessonGroup.controls.date.value;
     const startTimeValue = this.createLessonGroup.controls.startTime.value;
@@ -190,13 +194,24 @@ export class ScheduleComponent {
     });
   }
 
-  protected addLesson(dayIndex: number) {
-    const lesson: ScheduledLesson = {
-      day:  dayIndex,
-      startTime: TuiTime.currentLocal(),
-      endTime: TuiTime.currentLocal(),
-    };
-    this.sheduledLessons.push(lesson);
+  protected addLesson(dayIndex: number, content: PolymorpheusContent<TuiDialogContext>) {
+    this.dialogs.open(content, { label: 'Новое занятие', size: 'l', data: { dayIndex } }).subscribe({
+      complete: () => {
+        
+        const startTimeValue = this.scheduleLessonGroup.controls.startTime.value;
+        const endTimeValue = this.scheduleLessonGroup.controls.endTime.value;
+
+        const startDateTime: Date = new Date(0, 0, 0, startTimeValue.hours, startTimeValue.minutes);
+        const endDateTime: Date = new Date(0, 0, 0, endTimeValue.hours, endTimeValue.minutes);
+        
+        const scheduledLesson: ScheduledLesson = {
+          day: dayIndex,
+          startTime: startDateTime,
+          endTime: endDateTime,
+        }
+        this.scheduledLessons.push(scheduledLesson);
+      }
+    });
   }
 
   protected approveLessonCancelation(lesson: LessonEntity) {
@@ -205,10 +220,55 @@ export class ScheduleComponent {
       {
         label: 'Подтвердите действие',
         data: {
-          content: `Вы действительно хотите отменить занятие с ${lesson.startTime.toLocaleString()} по ${lesson.endTime.toLocaleString()}?`,
+          content: `Вы действительно хотите отменить занятие с ${lesson.startTime.toLocaleTimeString()} по ${lesson.endTime.toLocaleTimeString()}?`,
           yes: 'Да',
           no: 'Отмена'
         }
       }).subscribe({ next: (next) => console.log(next) });
+  }
+
+  protected scheduleLessons(observer: any) {
+    if (!this.selectedGroup) return;
+
+    const startTimeValue = this.scheduleLessonsGroup.controls.startTime.value;
+    const endTimeValue = this.scheduleLessonsGroup.controls.endTime.value;
+
+    const startDateTime: Date = new Date(startTimeValue.year, startTimeValue.month, startTimeValue.day);
+    const endDateTime: Date = new Date(endTimeValue.year, endTimeValue.month, endTimeValue.day);
+
+    const scheduledLessonsDtos = new Array<ScheduledLessonDto>;
+    
+    this.scheduledLessons.forEach((item: ScheduledLesson) => {
+      const lessonDto: ScheduledLessonDto = {
+        day: item.day + 1,
+        startTime: {
+          hour: item.startTime.getHours(),
+          minute: item.startTime.getMinutes(),
+          second: item.startTime.getSeconds(),
+          nano: 0,
+        },
+        endTime: {
+          hour: item.endTime.getHours(),
+          minute: item.endTime.getMinutes(),
+          second: item.endTime.getSeconds(),
+          nano: 0,
+        }
+      };
+      scheduledLessonsDtos.push(lessonDto);
+    });
+
+    const request: ScheduleBatchRequest = {
+      startTime: startDateTime.toISOString(),
+      endTime: endDateTime.toISOString(),
+      scheduledLessons: scheduledLessonsDtos
+    }
+
+    this.lessonService.scheduleGroupLessons(this.selectedGroup.id, request).subscribe({
+      next: () => {
+        this.alerts.open(`Занятие успешно создано`, { autoClose: 3000, label: 'Успех', appearance: 'positive' }).subscribe();
+        observer.complete();
+      },
+      error: (error) => this.alerts.open(error, { autoClose: 5000, label: 'Ошибка', appearance: 'negative' }).subscribe()
+    });
   }
 }

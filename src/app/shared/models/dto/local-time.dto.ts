@@ -1,6 +1,6 @@
 export interface LocalTimeDto {
   hour: number;
-  mimute: number;
+  minute: number;
   second: number;
   nano: number;
 }
