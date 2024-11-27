@@ -5,6 +5,7 @@ import { TuiAccordion } from '@taiga-ui/kit';
 import { injectContext } from '@taiga-ui/polymorpheus';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../models/response/api.response';
+import { EmptyResponse } from '../../models/response/empty.response';
 
 @Component({
   selector: 'app-list-selection',
@@ -17,7 +18,7 @@ import { ApiResponse } from '../../models/response/api.response';
   templateUrl: './list-selection.component.html',
   styleUrl: './list-selection.component.less',
 })
-export class ListSelectionComponent<T extends { id?: string, name?: string }> implements OnInit {
+export class ListSelectionComponent<T extends { id?: string, name?: string, fullName?: string }> implements OnInit {
   
   public readonly context = injectContext<TuiDialogContext<T | null, Observable<any>>>();
 
@@ -31,9 +32,9 @@ export class ListSelectionComponent<T extends { id?: string, name?: string }> im
   ngOnInit(): void {
     this.context.data.subscribe({
       next: (next: ApiResponse<Array<T>>) => {
-        console.log(next);
         next.data.map((item) => this.items.push(item));
-      }
+      },
+      error: (error: EmptyResponse) => { this.context.completeWith(null); }
     });
   }
   

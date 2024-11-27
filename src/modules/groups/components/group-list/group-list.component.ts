@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -25,6 +25,7 @@ import {
   TuiButtonGroup,
   TuiConfirmData,
   TuiFieldErrorPipe,
+  TuiSkeleton,
 } from '@taiga-ui/kit';
 import { TuiCardLarge, TuiHeader, TuiSearch } from '@taiga-ui/layout';
 import { switchMap } from 'rxjs';
@@ -54,12 +55,12 @@ import { CreateGroupRequest } from '../../../../app/shared/models/requests/creat
     TuiButtonGroup,
     TuiIcon,
     RouterLink,
-    RouterLinkActive,
     TuiError,
     TuiFieldErrorPipe,
     AsyncPipe,
     TuiInputModule,
     TuiTextfieldControllerModule,
+    TuiSkeleton,
   ],
   templateUrl: './group-list.component.html',
   styleUrl: './group-list.component.less',
@@ -70,7 +71,13 @@ export class GroupListComponent implements OnInit {
   private readonly dialogs = inject(TuiDialogService);
   private readonly alerts = inject(TuiAlertService);
 
-  constructor(private router: Router, private groupService: GroupService) {}
+  constructor(
+    private router: Router,
+    private groupService: GroupService,
+    private cdr: ChangeDetectorRef,
+  ) {}
+
+  protected skeletonGroups: boolean = true;
 
   protected groups: Array<GroupEntity> = new Array();
   protected selectedGroup: GroupEntity | null = null;
@@ -84,22 +91,20 @@ export class GroupListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.groupService.getGroups().subscribe({
-      next: (next) => {
-        next.data.map((groupDto) => this.groups.push(GroupMapper.mapToEntity(groupDto))
-      )},
-    });
+    this.getGroups();
   }
 
-  students = Array(
-    'Joanne Martin',
-    'Julio Brown',
-    'Wayne Martin',
-    'Eric Howell',
-    'Dorothy Johnson',
-    'Stanley Harris',
-    'Anna Morgan'
-  );
+  private getGroups() {
+    this.skeletonGroups = true;
+    this.groupService.getGroups().subscribe({
+      next: (next) => {
+        this.groups = new Array;
+        next.data.map((groupDto) => this.groups.push(GroupMapper.mapToEntity(groupDto)));
+        this.skeletonGroups = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
 
   selectGroup(selectedGroup: GroupEntity) {
     this.selectedGroup = selectedGroup;

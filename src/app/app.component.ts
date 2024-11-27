@@ -1,6 +1,6 @@
 import { TuiAlertService, tuiDateFormatProvider, tuiDialog, TuiRoot } from '@taiga-ui/core';
 import { FormsModule } from '@angular/forms';
-import { ChangeDetectionStrategy, Component, inject, LOCALE_ID, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, LOCALE_ID, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { RouterLink } from '@angular/router';
 import { registerLocaleData } from '@angular/common';
@@ -53,12 +53,20 @@ export class AppComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.me();
+  }
+
+  private me() {
     this.userService.me().subscribe({
-      next: (next) => { this.currentUser = UserMapper.mapToEntity(next.data) }
+      next: (next) => {
+        this.currentUser = UserMapper.mapToEntity(next.data);
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -67,7 +75,9 @@ export class AppComponent implements OnInit {
   });
 
   protected showLoginDialog(): void {
-    this.dialog(0).subscribe();
+    this.dialog(0).subscribe({
+      complete: () => this.me()
+    });
   }
 
   logout(): void {
@@ -77,6 +87,7 @@ export class AppComponent implements OnInit {
         this.profileDropdownState = false;
         this.currentUser = null;
         this.router.navigate(['/']);
+        this.cdr.detectChanges();
       },
       error: (error) => this.alerts.open(error.error.message, { appearance: "negative", label: "Ошибка", autoClose: 5000 }).subscribe()
     });

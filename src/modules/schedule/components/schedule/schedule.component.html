@@ -63,6 +63,7 @@
             iconStart="@tui.user-round-check"
             tuiIconButton
             type="button"
+            (click)="showAttendanceDialog(selectedGroup, lesson)"
           ></button>
           <button
             appearance="icon"
@@ -76,42 +77,44 @@
     </div>
   }
 } @else {
-  <tui-block-status size="l">
-    <div tuiHeader="l">
-      <h3 tuiTitle>
-        Для выбранной группы нет ни одного запланированного занятия
-      </h3>
-    </div>
-    <div
-      class="tui-form__buttons tui-form__buttons_align_center"
-      style="margin-bottom: 0"
-    >
-      <button
-        appearance="positive"
-        size="xl"
-        tuiButton
-        type="button"
-        iconStart="@tui.badge-plus"
-        class="tui-form__button"
-        (click)="showDialog(createLessonTemplate, 'Новое занятие', 'm')"
+  <div tuiAppearance="floating" tuiCardLarge tuiConnected>
+    <tui-block-status size="l">
+      <div tuiHeader="l">
+        <h3 tuiTitle>
+          Для выбранной группы нет ни одного запланированного занятия
+        </h3>
+      </div>
+      <div
+        class="tui-form__buttons tui-form__buttons_align_center"
+        style="margin-bottom: 0"
       >
-        Создать новое занятие
-      </button>
-      <button
-        appearance="negative"
-        size="xl"
-        tuiButton
-        type="button"
-        iconStart="@tui.calendar-plus-2"
-        class="tui-form__button"
-        (click)="
-          showDialog(scheduleLessonsTemplate, 'Планирование занятий', 'l')
-        "
-      >
-        Запланировать на период
-      </button>
-    </div>
-  </tui-block-status>
+        <button
+          appearance="positive"
+          size="xl"
+          tuiButton
+          type="button"
+          iconStart="@tui.badge-plus"
+          class="tui-form__button"
+          (click)="showDialog(createLessonTemplate, 'Новое занятие', 'm')"
+        >
+          Создать новое занятие
+        </button>
+        <button
+          appearance="negative"
+          size="xl"
+          tuiButton
+          type="button"
+          iconStart="@tui.calendar-plus-2"
+          class="tui-form__button"
+          (click)="
+            showDialog(scheduleLessonsTemplate, 'Планирование занятий', 'l')
+          "
+        >
+          Запланировать на период
+        </button>
+      </div>
+    </tui-block-status>
+  </div>
 }
 
 <ng-template #createLessonTemplate let-observer>

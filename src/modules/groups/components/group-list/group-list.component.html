@@ -31,12 +31,18 @@
       </form>
     </search>
     <tui-accordion class="container" style="margin-top: 16px;">
-      @for (group of this.groups; track $index) {
-      <tui-accordion-item [showArrow]="false" (click)="selectGroup(group)"
-        (dblclick)="changeRoute(group.id)"
-        [style.background]="(group == selectedGroup) ? 'AliceBlue' : ''">
-        {{ group.name }}
-      </tui-accordion-item>
+      @if (skeletonGroups) {
+        <tui-accordion-item [tuiSkeleton]="skeletonGroups"></tui-accordion-item>
+        <tui-accordion-item [tuiSkeleton]="skeletonGroups"></tui-accordion-item>
+        <tui-accordion-item [tuiSkeleton]="skeletonGroups"></tui-accordion-item>
+      } @else {
+        @for (group of this.groups; track $index) {
+          <tui-accordion-item [showArrow]="false" (click)="selectGroup(group)"
+            (dblclick)="changeRoute(group.id)"
+            [style.background]="(group == selectedGroup) ? 'AliceBlue' : ''">
+            {{ group.name }}
+          </tui-accordion-item>
+        }
       }
     </tui-accordion>
   </div>

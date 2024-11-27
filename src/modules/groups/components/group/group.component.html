@@ -4,187 +4,85 @@
   <div tuiHeader="xxl">
     <h1 tuiTitle style="margin-top: 0px; margin-bottom: 0;">
       <div tuiCaption>Группа</div>
-      {{ group?.name }}
+      @if(!skeletonGroup) {
+        {{ group!.name }}
+      } @else {
+        <span [tuiSkeleton]="true && 5"></span>
+      }
     </h1>
-    <div tuiAccessories>
-      <button
-        appearance="primary"
-        size="m"
-        tuiButton
-        type="button"
-        (click)="showDialog(addStudentTemplate)">
-        <tui-icon
-          icon="@tui.user-round-plus"
-          [style.height.rem]="1" />
-        Добавить
-      </button>
-      <button
-        appearance="accent"
-        size="m"
-        tuiButton
-        type="button">
-        <tui-icon
-          icon="@tui.user-round-x"
-          [style.height.rem]="1" />
-        Удалить
-      </button>
-    </div>
   </div>
-
-  <div
-    *tuiRepeatTimes="let index of 3"
-    tuiCell="l">
-    <tui-avatar
-      appearance="primary"
-      src="@tui.star" />
-    <div tuiTitle>
-      Title
-      <div tuiSubtitle>Description</div>
-    </div>
-  </div>
-
-  <footer>
-    <button
-      appearance="secondary"
-      size="m"
-      tuiButton
-      type="button">
-      Label
-    </button>
-  </footer>
 </div>
 
-<tui-scrollbar>
-  <cdk-virtual-scroll-viewport
-    #viewport
-    appendOnly
-    tuiScrollable
-    class="viewport tui-zero-scrollbar"
-    [itemSize]="45"
-    [maxBufferPx]="500"
-    [minBufferPx]="400">
-    <table
-      tuiTable
-      size="m"
-      [style.width.rem]="58">
-      <thead>
-        <tr>
-          <th tuiTh>Title</th>
-          <th tuiTh>Cell</th>
-          <th tuiTh>Status</th>
-          <th
-            tuiTh
-            [style.width.rem]="10">
-            Items
-          </th>
-          <th tuiTh>Progress</th>
-          <th tuiTh>Actions</th>
-        </tr>
-      </thead>
-      <tbody tuiTbody>
-        <tr *ngFor="let item of data">
-          <td tuiTd>
-            <div tuiCell="m">
-              <tui-avatar
-                [src]="item.cell.name | tuiInitials"
-                [style.background]="item.cell.name | tuiAutoColor" />
-              <span tuiTitle>
-                {{ item.cell.name }}
-                <span tuiSubtitle>{{ item.cell.email }}</span>
-              </span>
-            </div>
-          </td>
-          <td tuiTd>
-            <span [tuiStatus]="item.status.color">{{ item.status.value }}</span>
-          </td>
-          <td tuiTd>
-            <tui-items-with-more [style.gap.rem]="0.25">
-              <ng-template
-                let-number
-                tuiMore>
-                <button
-                  appearance="action-grayscale"
-                  tuiDropdownAlign="right"
-                  tuiLink
-                  type="button">
-                  + {{ item.items.length - number - 1 }}
-                </button>
-              </ng-template>
-            </tui-items-with-more>
-          </td>
-          <td tuiTd>
-            <span tuiStatus>
-              <progress
-                tuiProgressBar
-                [style.width.rem]="6"
-                [value]="item.progress / 100"></progress>
-              {{ item.progress }}ms
-            </span>
-          </td>
-          <td tuiTd>
-            <span tuiStatus>
-              <button
-                appearance="action"
-                iconStart="@tui.pencil"
-                size="xs"
-                tuiIconButton
-                type="button">
-                Edit
-              </button>
-              <button
-                appearance="action"
-                iconStart="@tui.ellipsis"
-                size="xs"
-                tuiIconButton
-                type="button">
-                More
-              </button>
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </cdk-virtual-scroll-viewport>
-</tui-scrollbar>
-
-<ng-template
-  #addStudentTemplate
-  let-observer>
-  <form [formGroup]="addStudentForm" (submit)="addStudent(observer)">
-    <div class="tui-row tui-row_sme">
-      <div class="tui-col_8">
-        <div class="tui-form__row">
-          <tui-input
-            formControlName="studentValue"
-            tuiHintContent="A tooltip">
-            Название
-            <input
-              tuiTextfieldLegacy />
-            <span class="tui-required"></span>
-          </tui-input>
-          <tui-error
-            formControlName="studentValue"
-            [error]="[] | tuiFieldError | async" />
-        </div>
+@if(students.length === 0) {
+  <div tuiAppearance="floating" tuiCardLarge tuiConnected>
+    <tui-block-status size="l">
+      <div tuiHeader="l">
+        <h3 tuiTitle>
+          В группе нет ни одного учащегося
+        </h3>
+      </div>
+    </tui-block-status>
+    <div
+        class="tui-form__buttons tui-form__buttons_align_center"
+        style="margin-bottom: 0"
+      >
+        <button
+          appearance="positive"
+          size="xl"
+          tuiButton
+          type="button"
+          iconStart="@tui.badge-plus"
+          class="tui-form__button"
+          (click)="showSelectionDialog()"
+        >
+          Добавить нового учащегося
+        </button>
+      </div>
+  </div>
+} @else { 
+  <div tuiAppearance="floating" tuiCardLarge>
+    <div tuiHeader="l">
+      <h1 tuiTitle="l" style="margin: 0;">Список учащихся</h1>
+      <div tuiAccessories>
+        <button
+          appearance="primary"
+          size="m"
+          tuiButton
+          type="button"
+          (click)="showSelectionDialog()">
+          <tui-icon
+            icon="@tui.user-round-plus"
+            [style.height.rem]="1" />
+          Добавить
+        </button>
       </div>
     </div>
-    <div class="tui-form__buttons">
-      <button
-        size="l"
-        tuiButton
-        type="submit"
-        class="tui-form__button">
-        Создать
-      </button>
-      <button
-        appearance="flat"
-        size="l"
-        tuiButton
-        type="button"
-        class="tui-form__button"
-        (click)="observer.complete()">
-        Отмена
-      </button>
-    </div>
-  </form>
-</ng-template>
+    
+    @for (student of students; track $index) {
+      <label tuiCell>
+        <tui-avatar
+            size="m"
+            [src]="student.fullName | tuiInitials"
+            [style.background]="student.fullName | tuiAutoColor"
+            [tuiSkeleton]="skeletonStudents"
+          />
+        <div tuiTitle [tuiSkeleton]="skeletonStudents && 10">
+          {{ student.fullName }}
+        </div>
+        <button
+          appearance="icon"
+          tuiIconButton
+          type="button"
+        ></button>
+        <button
+          appearance="icon"
+          iconStart="@tui.trash-2"
+          tuiIconButton
+          type="button"
+          (click)="approveStudentRemoving(student)"
+          [tuiSkeleton]="skeletonStudents"
+        ></button>
+      </label>
+    }
+  </div>
+}

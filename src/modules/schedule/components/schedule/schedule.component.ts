@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, LOCALE_ID } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, LOCALE_ID } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TuiAlertService, TuiAppearance, TuiButton, tuiDateFormatProvider, tuiDialog, TuiDialogContext, TuiDialogService, TuiDialogSize, TuiError, TuiIcon, TuiNotification, TuiTextfield, TuiTitle } from '@taiga-ui/core';
 import { TuiAvatar, TuiBadge, TuiBadgedContent, TuiConnected, TuiDataListWrapper, TuiFieldErrorPipe, TuiTabs, TUI_CONFIRM } from '@taiga-ui/kit';
@@ -19,6 +19,7 @@ import { LessonEntity } from '../../../../app/shared/models/entity/lesson.entity
 import { LessonMapper } from '../../../../app/shared/models/mapper/lesson.mapper';
 import { ScheduleBatchRequest } from '../../../../app/shared/models/requests/schedule-batch.request';
 import { ScheduledLessonDto } from '../../../../app/shared/models/dto/scheduled-lesson.dto';
+import { LessonAttendanceComponent } from '../lesson-attendance/lesson-attendance.component';
 
 type ScheduledLesson = {
   day: number,
@@ -42,31 +43,24 @@ type LessonByDay = {
     TuiCell,
     TuiDataListWrapper,
     TuiTextfield,
-    TuiNotification,
     TuiSelectModule,
     TuiTextfieldControllerModule,
     TuiTitle,
     TuiConnected,
     TuiInputModule,
     TuiSearch,
-    TuiError,
-    AsyncPipe,
-    TuiFieldErrorPipe,
     TuiButton,
     TuiInputDateModule,
     TuiInputTimeModule,
     TuiBlockStatus,
     TuiHeader,
-    TuiIcon,
     TuiTabs,
-    TuiBadge,
     TuiBadgedContent,
     DatePipe,
   ],
   templateUrl: './schedule.component.html',
   styleUrl: './schedule.component.less',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: []
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ScheduleComponent {
   
@@ -102,7 +96,8 @@ export class ScheduleComponent {
 
   constructor(
     private facadeService: FacadeService,
-    private lessonService: LessonService
+    private lessonService: LessonService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   protected readonly searchForm = new FormGroup({
@@ -131,6 +126,14 @@ export class ScheduleComponent {
     label: 'Выберите группу',
     size: 'fullscreen'
   });
+
+  private readonly attendanceDialog = tuiDialog(LessonAttendanceComponent, {
+    dismissible: true,
+  });
+
+  protected showAttendanceDialog(group: GroupEntity, lesson: LessonEntity): void {
+    this.attendanceDialog({ group, lesson }).subscribe();
+  }
   
   protected showSelectionDialog(): void {
     const observe = this.facadeService.getGroups();
@@ -189,7 +192,7 @@ export class ScheduleComponent {
             this.lessonsByDays.push({ day: day, lessons: new Array(lesson) });
           }
         });
-        console.log(this.lessonsByDays);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -241,18 +244,8 @@ export class ScheduleComponent {
     this.scheduledLessons.forEach((item: ScheduledLesson) => {
       const lessonDto: ScheduledLessonDto = {
         day: item.day + 1,
-        startTime: {
-          hour: item.startTime.getHours(),
-          minute: item.startTime.getMinutes(),
-          second: item.startTime.getSeconds(),
-          nano: 0,
-        },
-        endTime: {
-          hour: item.endTime.getHours(),
-          minute: item.endTime.getMinutes(),
-          second: item.endTime.getSeconds(),
-          nano: 0,
-        }
+        startTime: `${item.startTime.getHours()}:00:00`,
+        endTime: `${item.endTime.getHours()}:00:00`
       };
       scheduledLessonsDtos.push(lessonDto);
     });
@@ -262,6 +255,8 @@ export class ScheduleComponent {
       endTime: endDateTime.toISOString(),
       scheduledLessons: scheduledLessonsDtos
     }
+
+    console.log(request);
 
     this.lessonService.scheduleGroupLessons(this.selectedGroup.id, request).subscribe({
       next: () => {
