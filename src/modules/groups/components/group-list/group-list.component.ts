@@ -35,36 +35,35 @@ import { GroupMapper } from '../../../../app/shared/models/mapper/group.mapper';
 import type { PolymorpheusContent } from '@taiga-ui/polymorpheus';
 import { AsyncPipe } from '@angular/common';
 import { TuiInputModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
-import { CreateGroupRequest } from '../../../../app/shared/models/requests/create-group-request';
+import { CreateGroupRequest } from '../../../../app/shared/models/requests/create-group.request';
 
 @Component({
-  selector: 'app-group-list',
-  standalone: true,
-  imports: [
-    TuiAccordion,
-    TuiAccordionItem,
-    TuiAppearance,
-    TuiCardLarge,
-    TuiSearch,
-    TuiTextfield,
-    ReactiveFormsModule,
-    TuiButton,
-    TuiAvatar,
-    TuiHeader,
-    TuiTitle,
-    TuiButtonGroup,
-    TuiIcon,
-    RouterLink,
-    TuiError,
-    TuiFieldErrorPipe,
-    AsyncPipe,
-    TuiInputModule,
-    TuiTextfieldControllerModule,
-    TuiSkeleton,
-  ],
-  templateUrl: './group-list.component.html',
-  styleUrl: './group-list.component.less',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-group-list',
+    imports: [
+        TuiAccordion,
+        TuiAccordionItem,
+        TuiAppearance,
+        TuiCardLarge,
+        TuiSearch,
+        TuiTextfield,
+        ReactiveFormsModule,
+        TuiButton,
+        TuiAvatar,
+        TuiHeader,
+        TuiTitle,
+        TuiButtonGroup,
+        TuiIcon,
+        RouterLink,
+        TuiError,
+        TuiFieldErrorPipe,
+        AsyncPipe,
+        TuiInputModule,
+        TuiTextfieldControllerModule,
+        TuiSkeleton,
+    ],
+    templateUrl: './group-list.component.html',
+    styleUrl: './group-list.component.less',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GroupListComponent implements OnInit {
   

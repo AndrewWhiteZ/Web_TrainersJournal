@@ -22,7 +22,6 @@ registerLocaleData(localeRu);
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [
     RouterOutlet,
     TuiRoot,
@@ -34,14 +33,14 @@ registerLocaleData(localeRu);
     TuiNavigation,
     TuiTabs,
     TuiRoot
-],
+  ],
   providers: [
     tuiDateFormatProvider({ mode: 'DMY', separator: '.' }),
-    { provide: LOCALE_ID, useValue: 'ru-RU'},
+    { provide: LOCALE_ID, useValue: 'ru-RU' },
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.less',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {
 

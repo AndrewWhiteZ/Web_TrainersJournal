@@ -16,21 +16,20 @@ type Input = {
 }
 
 @Component({
-  selector: 'app-lesson-attendance',
-  standalone: true,
-  imports: [
-    TuiCell,
-    TuiButton,
-    TuiHeader,
-    TuiTitle,
-    TuiAvatar,
-    TuiInitialsPipe,
-    TuiAutoColorPipe,
-    TuiSkeleton
-  ],
-  templateUrl: './lesson-attendance.component.html',
-  styleUrl: './lesson-attendance.component.less',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-lesson-attendance',
+    imports: [
+        TuiCell,
+        TuiButton,
+        TuiHeader,
+        TuiTitle,
+        TuiAvatar,
+        TuiInitialsPipe,
+        TuiAutoColorPipe,
+        TuiSkeleton
+    ],
+    templateUrl: './lesson-attendance.component.html',
+    styleUrl: './lesson-attendance.component.less',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LessonAttendanceComponent implements OnInit {
   

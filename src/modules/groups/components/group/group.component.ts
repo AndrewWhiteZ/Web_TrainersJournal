@@ -1,17 +1,10 @@
-import {
-  CdkFixedSizeVirtualScroll,
-  CdkVirtualForOf,
-  CdkVirtualScrollViewport,
-} from '@angular/cdk/scrolling';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import type { TuiComparator } from '@taiga-ui/addon-table';
 import { TuiTable } from '@taiga-ui/addon-table';
-import { TuiDay, tuiToInt } from '@taiga-ui/cdk';
-import { TuiAlertService, TuiAppearance, TuiAutoColorPipe, TuiButton, tuiDialog, TuiDialogContext, TuiDialogService, TuiError, TuiIcon, TuiInitialsPipe, TuiLabel, TuiScrollable, TuiScrollbar } from '@taiga-ui/core';
-import { TUI_CONFIRM, TuiAvatar, TuiBadge, TuiBadgedContent, TuiBadgeNotification, TuiFieldErrorPipe, TuiItemsWithMore, TuiSkeleton, TuiStatus } from '@taiga-ui/kit';
+import { TuiAlertService, TuiAppearance, TuiAutoColorPipe, TuiButton, tuiDialog, TuiDialogContext, TuiDialogService, TuiDialogSize, TuiError, TuiIcon, TuiInitialsPipe, TuiLabel, TuiScrollable, TuiScrollbar, TuiTextfield, TuiTitle } from '@taiga-ui/core';
+import { TUI_CONFIRM, TuiAvatar, TuiBadge, TuiBadgedContent, TuiBadgeNotification, TuiConnected, TuiFieldErrorPipe, TuiItemsWithMore, TuiSkeleton, TuiStatus } from '@taiga-ui/kit';
 import { TuiBlockStatus, TuiCardLarge, TuiCell, TuiHeader } from '@taiga-ui/layout';
-import { map, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { GroupEntity } from '../../../../app/shared/models/entity/group.entity';
 import { GroupService } from '../../services/group.service';
 import { GroupMapper } from '../../../../app/shared/models/mapper/group.mapper';
@@ -20,63 +13,17 @@ import { StudentMapper } from '../../../../app/shared/models/mapper/student.mapp
 import { StudentEntity } from '../../../../app/shared/models/entity/student.entity';
 import { PolymorpheusContent } from '@taiga-ui/polymorpheus';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AsyncPipe } from '@angular/common';
-import { StudentService } from '../../../users/services/student.service';
-import { TuiInputModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
+import { TuiInputDateModule, TuiInputModule, TuiInputNumberModule, TuiInputTimeModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { ListSelectionComponent } from '../../../../app/shared/components/list-selection/list-selection.component';
 import { FacadeService } from '../../../../app/shared/services/facade.service';
-
-interface User {
-  readonly dob: TuiDay;
-  readonly name: string;
-}
-
-const TODAY = TuiDay.currentLocal();
-const FIRST = [
-  'John',
-  'Jane',
-  'Jack',
-  'Jill',
-  'James',
-  'Joan',
-  'Jim',
-  'Julia',
-  'Joe',
-  'Julia',
-];
-
-const LAST = [
-  'Smith',
-  'West',
-  'Brown',
-  'Jones',
-  'Davis',
-  'Miller',
-  'Johnson',
-  'Jackson',
-  'Williams',
-  'Wilson',
-];
-
-const DATA: readonly User[] = Array.from({ length: 300 }, () => ({
-  name: `${LAST[Math.floor(Math.random() * 10)]}, ${
-    FIRST[Math.floor(Math.random() * 10)]
-  }`,
-  dob: TODAY.append({ day: -Math.floor(Math.random() * 4000) - 7500 }),
-}));
-
-function getAge({ dob }: User): number {
-  const years = TODAY.year - dob.year;
-  const months = TODAY.month - dob.month;
-  const days = TODAY.day - dob.day;
-  const offset = tuiToInt(months > 0 || (!months && days > 9));
-
-  return years + offset;
-}
+import { LessonPricePeriodService } from '../../../lesson-price-period/services/lesson-price-period.service';
+import { LessonPricePeriodDto } from '../../../../app/shared/models/dto/lesson-price-period.dto';
+import { TuiDay } from '@taiga-ui/cdk';
+import { LessonPricePeriodRequest } from '../../../../app/shared/models/requests/lesson-price-period.request';
+import { TuiCurrencyPipe } from '@taiga-ui/addon-commerce';
 
 @Component({
   selector: 'app-group',
-  standalone: true,
   imports: [
     TuiTable,
     TuiIcon,
@@ -89,12 +36,19 @@ function getAge({ dob }: User): number {
     ReactiveFormsModule,
     TuiInputModule,
     TuiTextfieldControllerModule,
+    TuiTextfield,
     TuiSkeleton,
     TuiCell,
     TuiBadgedContent,
     TuiBlockStatus,
     TuiAutoColorPipe,
-    TuiInitialsPipe
+    TuiInitialsPipe,
+    TuiCurrencyPipe,
+    TuiTitle,
+    TuiConnected,
+    TuiInputDateModule,
+    TuiInputTimeModule,
+    TuiInputNumberModule,
   ],
   templateUrl: './group.component.html',
   styleUrl: './group.component.less',
@@ -107,18 +61,28 @@ export class GroupComponent implements OnInit, OnDestroy {
 
   protected skeletonGroup: boolean = true;
   protected skeletonStudents: boolean = true;
+  protected skeletonPrices: boolean = true;
   
   protected group: GroupEntity | null = null;
   protected students: Array<StudentEntity> = new Array;
+  protected prices: Array<LessonPricePeriodDto> = new Array;
+
   private routeSub: Subscription = new Subscription;
 
   protected readonly addStudentForm = new FormGroup({
     studentValue: new FormControl('', { validators: [Validators.required], nonNullable: true } ),
   });
 
+  protected readonly newPriceGroup = new FormGroup({
+    startDate: new FormControl(TuiDay.currentLocal(), { nonNullable: true }),
+    endDate: new FormControl(TuiDay.currentLocal(), { nonNullable: true }),
+    price: new FormControl(0, { nonNullable: true }),
+  });
+
   constructor(
     private route: ActivatedRoute,
     private groupService: GroupService,
+    private lessonPricePeriodService: LessonPricePeriodService,
     private facadeService: FacadeService,
     private cdr: ChangeDetectorRef
   ) {}
@@ -132,8 +96,9 @@ export class GroupComponent implements OnInit, OnDestroy {
           this.skeletonGroup = false;
           this.cdr.detectChanges();
           this.getStudents(groupId);
+          this.getPrices(groupId);
         } ,
-        error: (error) => this.alerts.open(error, { appearance: 'negative', autoClose: 5000, label: 'Ошибка' }).subscribe(),
+        error: (error) => this.alerts.open(error.error.message, { appearance: 'negative', autoClose: 5000, label: 'Ошибка' }).subscribe(),
       });
     });
   }
@@ -160,6 +125,23 @@ export class GroupComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  private getPrices(groupId: string) {
+    this.skeletonPrices = true;
+    this.cdr.detectChanges();
+    this.lessonPricePeriodService.getPrices(groupId).subscribe({
+      next: (next) => {
+        this.prices = next.data;
+      },
+      error: (error) => {
+        this.alerts.open(error.error.message, { appearance: 'negative', autoClose: 5000, label: 'Ошибка' }).subscribe();
+      },
+      complete: () => {
+        this.skeletonPrices = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
   
   private readonly dialog = tuiDialog(ListSelectionComponent<StudentDto>, {
     dismissible: true,
@@ -179,11 +161,15 @@ export class GroupComponent implements OnInit, OnDestroy {
             this.getStudents(this.group.id);
           },
           error: (error) => {
-            this.alerts.open(error.error.message, { autoClose: 5000, label: 'Ошибка', appearance: 'negative' }).subscribe();
+            this.alerts.open(error, { autoClose: 5000, label: 'Ошибка', appearance: 'negative' }).subscribe();
           },
         });
       }
     });
+  }
+
+  protected showNewPriceDialog(content: PolymorpheusContent<TuiDialogContext>, label: string, size: TuiDialogSize): void {
+    this.dialogs.open(content, { label, size }).subscribe();
   }
 
   protected approveStudentRemoving(student: StudentEntity): void {
@@ -207,6 +193,35 @@ export class GroupComponent implements OnInit, OnDestroy {
         if (this.group === null) return;
         this.alerts.open('Учащийся успешно исключен из группы', { autoClose: 3000, label: 'Успех', appearance: 'positive' }).subscribe();
         this.getStudents(this.group.id);
+        this.cdr.detectChanges();
+      },
+      error: (error) => this.alerts.open(error, { autoClose: 5000, label: 'Ошибка', appearance: 'negative' }).subscribe(),
+    });
+  }
+
+  protected addNewPrice() {
+    if (this.group === null) return;
+    
+    const startDate = this.newPriceGroup.controls.startDate.value;
+    const endDate = this.newPriceGroup.controls.endDate.value;
+
+    const startDateTime: Date = new Date(startDate.year, startDate.month, startDate.day);
+    const endDateTime: Date = new Date(endDate.year, endDate.month, endDate.day);
+
+    const request: LessonPricePeriodRequest = {
+      startTime: startDateTime.toISOString(),
+      endTime: endDateTime.toISOString(),
+      price: this.newPriceGroup.controls.price.value
+    };
+
+    console.log(request);
+
+    this.lessonPricePeriodService.postPrices(this.group.id, request).subscribe({
+      next: () => {
+        if (this.group === null) return;
+        this.alerts.open('Цена успешно добавлена', { autoClose: 3000, label: 'Успех', appearance: 'positive' }).subscribe();
+        this.getPrices(this.group.id);
+        this.cdr.detectChanges();
       },
       error: (error) => this.alerts.open(error, { autoClose: 5000, label: 'Ошибка', appearance: 'negative' }).subscribe(),
     });

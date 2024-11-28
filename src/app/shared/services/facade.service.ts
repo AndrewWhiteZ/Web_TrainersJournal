@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { UserService } from '../../../modules/users/services/user.service';
-import { SignUpRequest } from '../models/requests/sign-up-request';
-import { SignInRequest } from '../models/requests/sign-in-request';
+import { SignUpRequest } from '../models/requests/sign-up.request';
+import { SignInRequest } from '../models/requests/sign-in.request';
 import { GroupService } from '../../../modules/groups/services/group.service';
-import { CreateGroupRequest } from '../models/requests/create-group-request';
+import { CreateGroupRequest } from '../models/requests/create-group.request';
 import { StudentService } from '../../../modules/users/services/student.service';
 
 @Injectable({

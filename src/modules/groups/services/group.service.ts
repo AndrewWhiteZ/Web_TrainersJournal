@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { CreateGroupRequest } from '../../../app/shared/models/requests/create-group-request';
+import { CreateGroupRequest } from '../../../app/shared/models/requests/create-group.request';
 import { ApiResponse } from '../../../app/shared/models/response/api.response';
 import { GroupDto } from '../../../app/shared/models/dto/group.dto';
 import { StudentDto } from '../../../app/shared/models/dto/student.dto';

@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, LOCALE_ID } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { TuiAlertService, TuiAppearance, TuiButton, tuiDateFormatProvider, tuiDialog, TuiDialogContext, TuiDialogService, TuiDialogSize, TuiError, TuiIcon, TuiNotification, TuiTextfield, TuiTitle } from '@taiga-ui/core';
-import { TuiAvatar, TuiBadge, TuiBadgedContent, TuiConnected, TuiDataListWrapper, TuiFieldErrorPipe, TuiTabs, TUI_CONFIRM } from '@taiga-ui/kit';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { TuiAlertService, TuiAppearance, TuiButton, tuiDialog, TuiDialogContext, TuiDialogService, TuiDialogSize, TuiError, TuiIcon, TuiNotification, TuiTextfield, TuiTitle } from '@taiga-ui/core';
+import { TuiAvatar, TuiBadgedContent, TuiConnected, TuiDataListWrapper, TuiTabs, TUI_CONFIRM } from '@taiga-ui/kit';
 import { TuiBlockStatus, TuiCardLarge, TuiCell, TuiHeader, TuiSearch } from '@taiga-ui/layout';
 import { TuiInputDateModule, TuiInputModule, TuiInputTimeModule, TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { ListSelectionComponent } from '../../../../app/shared/components/list-selection/list-selection.component';
@@ -9,8 +9,7 @@ import { LessonService } from '../../services/lesson.service';
 import { FacadeService } from '../../../../app/shared/services/facade.service';
 import { GroupDto } from '../../../../app/shared/models/dto/group.dto';
 import type { PolymorpheusContent } from '@taiga-ui/polymorpheus';
-import { AsyncPipe, DatePipe } from '@angular/common';
-import { TuiInputDateTimeModule } from '@taiga-ui/legacy';
+import { DatePipe } from '@angular/common';
 import { TuiDay, TuiTime } from '@taiga-ui/cdk';
 import { GroupEntity } from '../../../../app/shared/models/entity/group.entity';
 import { ScheduleLessonRequest } from '../../../../app/shared/models/requests/schedule-lesson.request';
@@ -34,7 +33,6 @@ type LessonByDay = {
 
 @Component({
   selector: 'app-schedule',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     TuiAppearance,
@@ -69,19 +67,19 @@ export class ScheduleComponent {
   
   protected readonly items = [
     {
-        icon: '@tui.eye',
-        title: 'Show more',
-        subtitle: 'Ctrl + Shift + M',
+      icon: '@tui.eye',
+      title: 'Show more',
+      subtitle: 'Ctrl + Shift + M',
     },
     {
-        icon: '@tui.mail',
-        title: 'Send message',
-        subtitle: 'Keep it short',
+      icon: '@tui.mail',
+      title: 'Send message',
+      subtitle: 'Keep it short',
     },
     {
-        icon: '@tui.lock',
-        title: 'Access',
-        subtitle: 'Block your account',
+      icon: '@tui.lock',
+      title: 'Access',
+      subtitle: 'Block your account',
     },
   ];
 

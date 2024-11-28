@@ -3,14 +3,14 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TuiButton, TuiLabel, TuiTextfield, TuiIcon, TuiError, TuiDialogContext, TuiAlertService, tuiNumberFormatProvider, TuiGroup } from '@taiga-ui/core';
 import { TuiPassword, TuiFieldErrorPipe, TuiTabs, TuiDataListWrapper, TuiRadio, TuiStepper, TuiRadioList } from '@taiga-ui/kit';
-import { SignInRequest } from '../../models/requests/sign-in-request';
+import { SignInRequest } from '../../models/requests/sign-in.request';
 import { injectContext } from '@taiga-ui/polymorpheus';
-import { SignUpRequest } from '../../models/requests/sign-up-request';
+import { SignUpRequest } from '../../models/requests/sign-up.request';
 import { TuiInputDateModule, TuiInputModule, TuiInputNumberModule, tuiInputNumberOptionsProvider, TuiInputPhoneModule, TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { UserService } from '../../../../modules/users/services/user.service';
 import { UserRole } from '../../models/enum/user-role.enum';
 import { TuiDay } from '@taiga-ui/cdk';
-import { StudentSignUpRequest } from '../../models/requests/student-sign-up-request';
+import { StudentSignUpRequest } from '../../models/requests/student-sign-up.request';
 
 export interface UserRoleSpec {
   apiName: string;
@@ -26,42 +26,40 @@ export function getUserRoleSpec(userRole: UserRole): UserRoleSpec {
 }
 
 @Component({
-  selector: 'app-login-dialog',
-  standalone: true,
-  imports: [
-    AsyncPipe,
-    ReactiveFormsModule,
-    TuiButton,
-    TuiDataListWrapper,
-    TuiError,
-    TuiFieldErrorPipe,
-    TuiGroup,
-    TuiInputDateModule,
-    TuiInputModule,
-    TuiInputNumberModule,
-    TuiInputPhoneModule,
-    TuiLabel,
-    TuiRadio,
-    TuiSelectModule,
-    TuiStepper,
-    TuiTextfieldControllerModule,
-    TuiTextfield,
-    TuiPassword,
-    TuiTabs,
-    TuiIcon,
-    TuiRadioList,
-  ],
-  templateUrl: './login-dialog.component.html',
-  styleUrl: './login-dialog.component.less',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    tuiNumberFormatProvider({
-      precision: 0,
-    }),
-    tuiInputNumberOptionsProvider({
-        step: 1,
-    }),
-  ]
+    selector: 'app-login-dialog',
+    imports: [
+        AsyncPipe,
+        ReactiveFormsModule,
+        TuiButton,
+        TuiDataListWrapper,
+        TuiError,
+        TuiFieldErrorPipe,
+        TuiInputDateModule,
+        TuiInputModule,
+        TuiInputNumberModule,
+        TuiInputPhoneModule,
+        TuiLabel,
+        TuiRadio,
+        TuiSelectModule,
+        TuiStepper,
+        TuiTextfieldControllerModule,
+        TuiTextfield,
+        TuiPassword,
+        TuiTabs,
+        TuiIcon,
+        TuiRadioList,
+    ],
+    templateUrl: './login-dialog.component.html',
+    styleUrl: './login-dialog.component.less',
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [
+        tuiNumberFormatProvider({
+            precision: 0,
+        }),
+        tuiInputNumberOptionsProvider({
+            step: 1,
+        }),
+    ]
 })
 export class LoginDialogComponent {
 
