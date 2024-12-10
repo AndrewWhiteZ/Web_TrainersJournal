@@ -4,6 +4,18 @@
   "newProjectRoot": "projects",
   "projects": {
     "Web_TrainersJournal": {
+      "i18n": {
+        "sourceLocale": { 
+          "code": "ru",
+          "baseHref": "/ru"
+        },
+        "locales": {
+          "en": {
+            "translation": "src/locale/messages.en.xlf",
+            "baseHref": "/en/"
+          }
+        }
+      },
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {

@@ -1,60 +1,108 @@
-<div class="tui-container">
-  <div
-    tuiAppearance="floating"
-    tuiCardLarge
-    class="tui-space_vertical-4">
-    <div tuiHeader="l">
-      <h1 tuiTitle>
-        <div tuiCaption>Группа</div>
-        @if(!skeletonGroup) {
-          {{ group!.name }}
-        } @else {
-          <div class="d-flex" [tuiSkeleton]="true">'</div>
-        }
-      </h1>
-      <div tuiAccessories>
-        <tui-avatar
-          appearance="primary"
-          size="m"
-          src="@tui.users-round"
-        />
-      </div>
+<div
+  tuiAppearance="floating"
+  tuiCardLarge
+  style="flex-grow: 1;">
+  <div tuiHeader="xxl">
+    <h1 tuiTitle style="margin-top: 0px; margin-bottom: 0;">
+      <div tuiCaption>Группа</div>
+      @if(!skeletonGroup) {
+        {{ group!.name }}
+      } @else {
+        <span [tuiSkeleton]="true && 5"></span>
+      }
+    </h1>
+    <div tuiAccessories>
+      @if(group) {
+        <button
+          appearance="secondary-grayscale"
+          iconStart="@tui.group"
+          tuiIconButton
+          type="button"
+          size="xl"
+          [tuiSkeleton]="skeletonGroup"
+          [style.border-radius.%]="100"
+          [style.background]="group.name | tuiAutoColor"
+        ></button>
+      } @else {
+        <button
+          tuiIconButton
+          type="button"
+          size="xl"
+          [tuiSkeleton]="skeletonGroup"
+          [style.border-radius.%]="100"
+          [tuiSkeleton]="true"
+        ></button>
+      }
     </div>
   </div>
-
-  @if(students.length === 0) {
-    <div tuiAppearance="floating" tuiCardLarge tuiConnected class="tui-space_vertical-4">
-      <tui-block-status size="l">
-        <div tuiHeader="l">
-          <h3 tuiTitle>
-            В группе нет ни одного учащегося
-          </h3>
-        </div>
-      </tui-block-status>
-      <div
-          class="tui-form__buttons tui-form__buttons_align_center"
-          style="margin-bottom: 0"
-        >
+  <tui-tabs [(activeItemIndex)]="activeTabIndex" size="l">
+    <button
+      iconStart="@tui.users"
+      tuiTab
+      type="button"
+    >
+      Список учащихся
+    </button>
+    <button
+      iconStart="@tui.circle-dollar-sign"
+      tuiTab
+      type="button"
+    >
+      Цены занятий
+    </button>
+  </tui-tabs>
+  @if(activeTabIndex === 0) {
+    <search tuiSearch>
+      <form [formGroup]="searchForm">
+        <fieldset tuiTextfieldSize="m">
+          <tui-textfield iconStart="@tui.search">
+            <input
+              formControlName="search"
+              placeholder="Имя учащегося"
+              tuiTextfield />
+          </tui-textfield>
           <button
             appearance="positive"
-            size="xl"
+            size="m"
             tuiButton
             type="button"
-            iconStart="@tui.badge-plus"
-            class="tui-form__button"
+            iconStart="@tui.circle-plus"
             (click)="showSelectionDialog()"
           >
-            Добавить нового учащегося
+            Добавить учащегося
           </button>
-        </div>
-    </div>
-  } @else { 
-    <div tuiAppearance="floating" tuiCardLarge class="tui-space_vertical-4">
-      <div tuiHeader="l">
-        <h1 tuiTitle="l" style="margin: 0;">Список учащихся</h1>
-        <div tuiAccessories>
-          <button
-            appearance="primary"
+        </fieldset>
+      </form>
+    </search>
+    @if(students.length === 0) {
+      <div tuiAppearance="floating" tuiCardLarge tuiConnected>
+        <tui-block-status size="l">
+          <div tuiHeader="l">
+            <h3 tuiTitle>
+              В группе нет ни одного учащегося
+            </h3>
+          </div>
+        </tui-block-status>
+        <div
+            class="tui-form__buttons tui-form__buttons_align_center"
+            style="margin-bottom: 0"
+          >
+            <button
+              appearance="positive"
+              size="xl"
+              tuiButton
+              type="button"
+              iconStart="@tui.circle-plus"
+              (click)="showSelectionDialog()"
+            >
+              Добавить нового учащегося
+            </button>
+          </div>
+      </div>
+    } @else {
+      @for (student of students; track $index) {
+        <label tuiCell>
+          <tui-avatar
             size="m"
             tuiButton
             type="button"
@@ -90,100 +138,152 @@
             type="button"
             (click)="approveStudentRemoving(student)"
             [tuiSkeleton]="skeletonStudents"
+          />
+          <div tuiTitle [tuiSkeleton]="skeletonStudents && 10">
+            {{ student.fullName }}
+            <span tuiSubtitle>
+              <tui-chip size="xxs" [style.background]="student.beltLevel | beltLevelColor">{{ student.beltLevel | beltLevel }}</tui-chip>
+            </span>
+          </div>
+          <button
+            appearance=""
+            tuiIconButton
+          ></button>
+          <button
+            appearance="secondary-destructive"
+            iconStart="@tui.trash-2"
+            tuiIconButton
+            type="button"
+            size="m"
+            [tuiSkeleton]="skeletonStudents"
+            [style.border-radius.%]="100"
+            (click)="approveStudentDeletion(student)"
           ></button>
         </label>
       }
-    </div>
-  }
-
-  @if(prices.length === 0) {
-    <div tuiAppearance="floating" tuiCardLarge tuiConnected class="tui-space_vertical-3">
-      <tui-block-status size="l">
-        <div tuiHeader="l">
-          <h3 tuiTitle>
-            Нет ни одной записи цены
-          </h3>
-        </div>
-      </tui-block-status>
-      <div
-          class="tui-form__buttons tui-form__buttons_align_center"
-          style="margin-bottom: 0"
-        >
+    }
+  } @else if (activeTabIndex === 1) {
+    <search tuiSearch>
+      <form [formGroup]="searchForm">
+        <fieldset tuiTextfieldSize="m">
           <button
             appearance="positive"
-            size="xl"
-            tuiButton
-            type="button"
-            iconStart="@tui.badge-plus"
-            class="tui-form__button"
-            (click)="showNewPriceDialog(newPriceTemplate, 'Новая цена', 'm')"
-          >
-            Добавить запись новой цены
-          </button>
-        </div>
-    </div>
-  } @else { 
-    <div tuiAppearance="floating" tuiCardLarge class="tui-space_vertical-3">
-      <div tuiHeader="l">
-        <h1 tuiTitle="l" style="margin: 0;">Цены занятий</h1>
-        <div tuiAccessories>
-          <button
-            appearance="primary"
             size="m"
             tuiButton
             type="button"
-            (click)="showNewPriceDialog(newPriceTemplate, 'Новая цена', 'm')">
-            <tui-icon
-              icon="@tui.badge-plus"
-              [style.height.rem]="1" />
-            Добавить
+            iconStart="@tui.circle-plus"
+            (click)="showDialog(addLessonPricePeriodTemplate, 'Новый период цен')"
+          >
+            Добавить период
           </button>
-        </div>
-      </div>
-      
-      @for (price of prices; track $index) {
-        <label tuiCell>
-          <tui-avatar
-              size="m"
-              src="₽"
-              [style.background]="price.id| tuiAutoColor"
-              [tuiSkeleton]="skeletonPrices"
-            />
-          <div tuiTitle [tuiSkeleton]="skeletonPrices && 10">
-            <b>{{ price.startTime }} — {{ price.startTime }}: {{ price.price }}</b>
+        </fieldset>
+      </form>
+    </search>
+    @if(lessonPrices.length === 0) {
+      <div tuiAppearance="floating" tuiCardLarge tuiConnected>
+        <tui-block-status size="l">
+          <div tuiHeader="l">
+            <h3 tuiTitle>
+              Не установлена ни одна цена
+            </h3>
           </div>
+        </tui-block-status>
+        <div
+            class="tui-form__buttons tui-form__buttons_align_center"
+            style="margin-bottom: 0"
+          >
+            <button
+              appearance="positive"
+              size="xl"
+              tuiButton
+              type="button"
+              iconStart="@tui.circle-plus"
+              (click)="showDialog(addLessonPricePeriodTemplate, 'Новый период цен')"
+            >
+              Добавить новую цену
+            </button>
+          </div>
+      </div>
+    } @else {
+      @for (price of lessonPrices; track $index) {
+        <label
+          tuiCell
+          type="button"
+        >
+          <tui-avatar
+            size="m"
+            src="@tui.russian-ruble"
+            appearance="positive"
+          />
+          <div tuiTitle>
+            <strong>{{ price.price | tuiAmount : 'RUB' : 'right' | async }}</strong>
+            <span tuiSubtitle>{{ price.startTime | date : 'longDate' }} – {{ price.endTime | date : 'longDate' }}</span>
+          </div>
+          <button
+            appearance=""
+            tuiIconButton
+          ></button>
+          <button
+            appearance="secondary"
+            iconStart="@tui.pencil"
+            tuiIconButton
+            type="button"
+            size="m"
+            [tuiSkeleton]="skeletonPrices"
+            [style.border-radius.%]="100"
+            (click)="showLessonPricePeriodUpdateDialog(updateLessonPricePeriodTemplate, 'Изменение периода цен', price)"
+          ></button>
+          <button
+            appearance="secondary-destructive"
+            iconStart="@tui.trash-2"
+            tuiIconButton
+            type="button"
+            size="m"
+            [tuiSkeleton]="skeletonStudents"
+            [style.border-radius.%]="100"
+            (click)="approveLessonPricePeriodDeletion(price)"
+          ></button>
         </label>
       }
-    </div>
+    }
   }
 </div>
 
-<ng-template #newPriceTemplate let-observer>
-  <form [formGroup]="newPriceGroup" (submit)="addNewPrice()">
+<ng-template
+  #addLessonPricePeriodTemplate
+  let-observer>
+  <form [formGroup]="addLessonPricePeriodForm" (submit)="addLessonPricePeriod(observer)">
     <div class="tui-form__header"></div>
     <div class="tui-row tui-row_sme">
       <div class="tui-col_12">
         <div class="tui-form__row tui-form__row_multi-fields">
           <div class="tui-form__multi-field">
-            <tui-input-date formControlName="startDate">
-              Дата начала действия цены
+            <tui-input-date formControlName="startTime">
+              Дата начала
             </tui-input-date>
           </div>
           <div class="tui-form__multi-field">
-            <tui-input-date formControlName="endDate">
-              Дата окончания действия цены
+            <tui-input-date formControlName="endTime">
+              Дата окончания
             </tui-input-date>
           </div>
         </div>
         <div class="tui-form__row">
-          <tui-input-number formControlName="price" [tuiTextfieldPostfix]="'RUB' | tuiCurrency">
+          <tui-input-number
+            [tuiTextfieldPostfix]="'RUB' | tuiCurrency"
+            formControlName="price"
+          >
             Стоимость занятия
           </tui-input-number>
         </div>
       </div>
     </div>
     <div class="tui-form__buttons">
-      <button size="l" tuiButton type="submit" class="tui-form__button">
+      <button
+        size="l"
+        tuiButton
+        type="submit"
+        class="tui-form__button">
         Создать
       </button>
       <button
@@ -192,8 +292,57 @@
         tuiButton
         type="button"
         class="tui-form__button"
-        (click)="observer.complete()"
-      >
+        (click)="observer.complete()">
+        Отмена
+      </button>
+    </div>
+  </form>
+</ng-template>
+
+<ng-template
+  #updateLessonPricePeriodTemplate
+  let-observer>
+  <form [formGroup]="updateLessonPricePeriodForm" (submit)="updateLessonPricePeriod(observer)">
+    <div class="tui-form__header"></div>
+    <div class="tui-row tui-row_sme">
+      <div class="tui-col_12">
+        <div class="tui-form__row tui-form__row_multi-fields">
+          <div class="tui-form__multi-field">
+            <tui-input-date formControlName="startTime">
+              Дата начала
+            </tui-input-date>
+          </div>
+          <div class="tui-form__multi-field">
+            <tui-input-date formControlName="endTime">
+              Дата окончания
+            </tui-input-date>
+          </div>
+        </div>
+        <div class="tui-form__row">
+          <tui-input-number
+            [tuiTextfieldPostfix]="'RUB' | tuiCurrency"
+            formControlName="price"
+          >
+            Стоимость занятия
+          </tui-input-number>
+        </div>
+      </div>
+    </div>
+    <div class="tui-form__buttons">
+      <button
+        size="l"
+        tuiButton
+        type="submit"
+        class="tui-form__button">
+        Изменить
+      </button>
+      <button
+        appearance="flat"
+        size="l"
+        tuiButton
+        type="button"
+        class="tui-form__button"
+        (click)="observer.complete()">
         Отмена
       </button>
     </div>

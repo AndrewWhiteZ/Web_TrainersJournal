@@ -1,17 +1,20 @@
-<div>
+<div tuiConnected>
   <div tuiHeader="l">
     <h1 tuiTitle="l" style="margin-top: 0; margin-bottom: 1rem;">Посещаемость</h1>
   </div>
   @for (student of students; track $index) {
     <label tuiCell>
       <tui-avatar
-          size="m"
-          [src]="student.fullName | tuiInitials"
-          [style.background]="student.fullName | tuiAutoColor"
-          [tuiSkeleton]="false"
-        />
-      <div tuiTitle [tuiSkeleton]="false && 10">
-        {{ student.fullName }} – Пояс: {{ student.beltLevel }}
+        size="m"
+        [src]="student.fullName| tuiInitials"
+        [style.background]="student.fullName | tuiAutoColor"
+        [tuiSkeleton]="skeletonStudents"
+      />
+      <div tuiTitle>
+        <span [tuiSkeleton]="skeletonStudents && 2">{{ student.fullName }}</span>
+        <span tuiSubtitle [tuiSkeleton]="skeletonStudents">
+          <tui-chip size="xxs" [style.background]="student.beltLevel | beltLevelColor">{{ student.beltLevel | beltLevel }}</tui-chip>
+        </span>
       </div>
       @if (getStudentAttendance(student.id)) {
         <button
@@ -20,6 +23,7 @@
           size="m"
           tuiIconButton
           type="button"
+          [tuiSkeleton]="skeletonStudents"
           [style.border-radius.%]="100"
           (click)="unmarkAttenadance(student.id)"
         ></button>
@@ -30,6 +34,7 @@
           size="m"
           tuiIconButton
           type="button"
+          [tuiSkeleton]="skeletonStudents"
           [style.border-radius.%]="100"
           (click)="markAttendance(student.id)"
         ></button>

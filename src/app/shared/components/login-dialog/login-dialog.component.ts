@@ -26,40 +26,41 @@ export function getUserRoleSpec(userRole: UserRole): UserRoleSpec {
 }
 
 @Component({
-    selector: 'app-login-dialog',
-    imports: [
-        AsyncPipe,
-        ReactiveFormsModule,
-        TuiButton,
-        TuiDataListWrapper,
-        TuiError,
-        TuiFieldErrorPipe,
-        TuiInputDateModule,
-        TuiInputModule,
-        TuiInputNumberModule,
-        TuiInputPhoneModule,
-        TuiLabel,
-        TuiRadio,
-        TuiSelectModule,
-        TuiStepper,
-        TuiTextfieldControllerModule,
-        TuiTextfield,
-        TuiPassword,
-        TuiTabs,
-        TuiIcon,
-        TuiRadioList,
-    ],
-    templateUrl: './login-dialog.component.html',
-    styleUrl: './login-dialog.component.less',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [
-        tuiNumberFormatProvider({
-            precision: 0,
-        }),
-        tuiInputNumberOptionsProvider({
-            step: 1,
-        }),
-    ]
+  selector: 'app-login-dialog',
+  standalone: true,
+  imports: [
+    AsyncPipe,
+    ReactiveFormsModule,
+    TuiButton,
+    TuiDataListWrapper,
+    TuiError,
+    TuiFieldErrorPipe,
+    TuiInputDateModule,
+    TuiInputModule,
+    TuiInputNumberModule,
+    TuiInputPhoneModule,
+    TuiLabel,
+    TuiRadio,
+    TuiSelectModule,
+    TuiStepper,
+    TuiTextfieldControllerModule,
+    TuiTextfield,
+    TuiPassword,
+    TuiTabs,
+    TuiIcon,
+    TuiRadioList,
+  ],
+  templateUrl: './login-dialog.component.html',
+  styleUrl: './login-dialog.component.less',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    tuiNumberFormatProvider({
+      precision: 0,
+    }),
+    tuiInputNumberOptionsProvider({
+        step: 1,
+    }),
+  ]
 })
 export class LoginDialogComponent {
 
@@ -105,34 +106,34 @@ export class LoginDialogComponent {
   }
 
   protected submitSignUp(): void {
-    const commonRequest: SignUpRequest = {
-      login: this.signUpForm.controls.loginValue.value ?? "",
-      fullName: this.signUpForm.controls.fullNameValue.value ?? "",
-      email: this.signUpForm.controls.emailValue.value ?? "",
-      phone: this.signUpForm.controls.phoneValue.value ?? "",
-      password: this.signUpForm.controls.passwordValue.value ?? "",
-      role: getUserRoleSpec(this.signUpForm.controls.roleValue.value as UserRole).apiName ?? "",
-    };
+    // const commonRequest: SignUpRequest = {
+    //   login: this.signUpForm.controls.loginValue.value ?? "",
+    //   fullName: this.signUpForm.controls.fullNameValue.value ?? "",
+    //   email: this.signUpForm.controls.emailValue.value ?? "",
+    //   phone: this.signUpForm.controls.phoneValue.value ?? "",
+    //   password: this.signUpForm.controls.passwordValue.value ?? "",
+    //   role: getUserRoleSpec(this.signUpForm.controls.roleValue.value as UserRole[]).apiName ?? "",
+    // };
 
-    let request: SignUpRequest | StudentSignUpRequest = commonRequest;
-    if (this.signUpForm.controls.roleValue.value === UserRole.STUDENT) {
-      request = { 
-        ...commonRequest,
-        beltLevel: this.signUpForm.controls.beltLevelValue.value ?? 0,
-        birthDate: String(this.signUpForm.controls.birthDateValue.value?.toJSON()),
-        parentFullName: this.signUpForm.controls.parentFullNameValue.value ?? "",
-        parentPhone: this.signUpForm.controls.parentPhoneValue.value ?? "",
-      };
-    }
+    //let request: SignUpRequest | StudentSignUpRequest = commonRequest;
+    // if (this.signUpForm.controls.roleValue.value === UserRole.STUDENT) {
+    //   request = { 
+    //     ...commonRequest,
+    //     beltLevel: this.signUpForm.controls.beltLevelValue.value ?? 0,
+    //     birthDate: String(this.signUpForm.controls.birthDateValue.value?.toJSON()),
+    //     parentFullName: this.signUpForm.controls.parentFullNameValue.value ?? "",
+    //     parentPhone: this.signUpForm.controls.parentPhoneValue.value ?? "",
+    //   };
+    // }
 
-    this.userService.register(request).subscribe({
-      next: (next) => {
-        this.alerts.open(`Пользователь <b>${next.data.fullName}</b> зарегистрирован`, { appearance: "positive", label: "Успех", autoClose: 3000 }).subscribe();
-        this.context.completeWith(null);
-      },
-      error: (error) => 
-        this.alerts.open(error.error.message, { appearance: "negative", label: "Ошибка", autoClose: 5000 }).subscribe()
-    });
+    // this.userService.register(request).subscribe({
+    //   next: (next) => {
+    //     this.alerts.open(`Пользователь <b>${next.data.fullName}</b> зарегистрирован`, { appearance: "positive", label: "Успех", autoClose: 3000 }).subscribe();
+    //     this.context.completeWith(null);
+    //   },
+    //   error: (error) => 
+    //     this.alerts.open(error.error.message, { appearance: "negative", label: "Ошибка", autoClose: 5000 }).subscribe()
+    // });
   }
 
   protected reset(): void {

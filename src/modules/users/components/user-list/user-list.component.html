@@ -1,0 +1,182 @@
+<div tuiAppearance="floating" tuiCardLarge tuiConnected>                            
+  <div tuiHeader="l">
+    <h1 tuiTitle="l">Список учащихся</h1>
+  </div>
+  <search tuiSearch>
+    <form [formGroup]="searchForm">
+      <fieldset tuiTextfieldSize="m">
+        <tui-textfield iconStart="@tui.search">
+          <input
+            formControlName="search"
+            placeholder="Имя учащегося"
+            tuiTextfield />
+        </tui-textfield>
+        <button
+          appearance="positive"
+          size="m"
+          tuiButton
+          type="button"
+          iconStart="@tui.circle-plus"
+          (click)="showDialog(addStudentTemplate, 'Новый учащийся')"
+        >
+          Добавить учащегося
+        </button>
+      </fieldset>
+    </form>
+  </search>
+  <hr>
+  @for (student of students; track $index) {
+    <label tuiCell (dblclick)="changeRoute(student.id)">
+      <tui-avatar
+        size="m"
+        [src]="student.fullName| tuiInitials"
+        [style.background]="student.fullName | tuiAutoColor"
+        [tuiSkeleton]="skeletonStudents"
+      />
+      <div tuiTitle [tuiSkeleton]="skeletonStudents && 10">
+        {{ student.fullName }}
+        <span tuiSubtitle>
+          <tui-chip size="xxs" [style.background]="student.beltLevel | beltLevelColor">{{ student.beltLevel | beltLevel }}</tui-chip>
+        </span>
+      </div>
+      <button
+        appearance="secondary"
+        iconStart="@tui.pencil"
+        tuiIconButton
+        type="button"
+        size="m"
+        [tuiSkeleton]="skeletonStudents"
+        [style.border-radius.%]="100"
+        (click)="changeRoute(student.id)"
+      ></button>
+    </label>
+  }
+  <tui-pagination
+    size="l"
+    [index]="index"
+    [length]="length"
+  />
+</div>
+<ng-template
+  #addStudentTemplate
+  let-observer>
+  <form [formGroup]="addStudentForm" (submit)="addStudent(observer)">
+    <div class="tui-form__header"></div>
+    <tui-stepper [(activeItemIndex)]="activeTabIndex">
+      <a tuiStep>
+        Авторизация
+      </a>
+      <a tuiStep>
+        Информация об учащемся
+      </a>
+      <a tuiStep>
+        Информация о родителях
+      </a>
+    </tui-stepper>
+    @if(activeTabIndex === 0) {
+      <div class="tui-form__row">
+        <tui-textfield>
+          <label tuiLabel>Адрес электорнной почты</label>
+          <input
+            tuiTextfield
+            autocomplete="email"
+            formControlName="email" />
+        </tui-textfield>
+      </div>
+      <div class="tui-form__row">
+        <tui-textfield>
+          <label tuiLabel>Логин</label>
+          <input
+            tuiTextfield
+            autocomplete="username"
+            formControlName="login" />
+        </tui-textfield>
+      </div>
+      <div class="tui-form__row">
+        <tui-textfield>
+          <label tuiLabel>Пароль</label>
+          <input
+            tuiTextfield
+            type="password"
+            formControlName="password" />
+          <tui-icon tuiPassword/>
+        </tui-textfield>
+      </div>
+    } @else if(activeTabIndex === 1) {
+      <div class="tui-form__row">
+        <tui-textfield>
+          <label tuiLabel>Полное имя</label>
+          <input
+            tuiTextfield
+            autocomplete="name"
+            formControlName="fullName" />
+        </tui-textfield>
+      </div>
+      <div class="tui-form__row">
+        <tui-input-phone formControlName="phone">
+          Номер телефона
+          <input
+            autocomplete="tel"
+            tuiTextfieldLegacy />
+        </tui-input-phone>
+      </div>
+      <div class="tui-form__row">
+        <tui-input-number
+          formControlName="beltLevel"
+          [min]="0"
+          [max]="10">Уровень пояса</tui-input-number>
+      </div>
+      <div class="tui-form__row">
+        <tui-input-date
+          formControlName="birthDate">
+          Дата рождения
+        </tui-input-date>
+      </div>
+    } @else if(activeTabIndex === 2) {
+      <div class="tui-form__row">
+        <tui-textfield>
+          <label tuiLabel>Полное имя родителя</label>
+          <input
+            tuiTextfield
+            formControlName="parentFullName">
+        </tui-textfield>
+      </div>
+      <div class="tui-form__row">
+        <tui-input-phone formControlName="parentPhone">
+          Номер телефона родителя
+          <input
+            tuiTextfieldLegacy />
+        </tui-input-phone>
+      </div>
+    }
+    <div class="tui-form__buttons tui-form__buttons_align_end">
+      <button
+        appearance="flat"
+        size="l"
+        tuiButton
+        type="button"
+        class="tui-form__button"
+        (click)="observer.complete()">
+        Отмена
+      </button>
+      @if(activeTabIndex === 2) {
+        <button
+          size="l"
+          tuiButton
+          type="submit"
+          class="tui-form__button">
+          Создать
+        </button>
+      } @else {
+        <button
+          size="l"
+          tuiButton
+          type="button"
+          class="tui-form__button"
+          (click)="activeTabIndex = activeTabIndex + 1">
+          Далее
+        </button>
+      }
+    </div>
+  </form>
+</ng-template>
