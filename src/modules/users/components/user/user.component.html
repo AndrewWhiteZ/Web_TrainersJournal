@@ -1,0 +1,144 @@
+<div tuiAppearance="floating" tuiCardLarge>
+  @if (user) {
+    <header tuiHeader="xl">
+      <h2 tuiTitle>
+        <div tuiCaption>Пользователь</div>
+        @if (isStudent(user)) {
+          <span>{{ user.fullName }} <tui-chip size="s" [style.background]="getTypeStudentEntity(user).beltLevel | beltLevelColor">{{ getTypeStudentEntity(user).beltLevel | beltLevel }}</tui-chip></span>
+        } @else {
+          <span>{{ user.fullName }}</span>
+        }
+        <div tuiSubtitle>{{ user.role }}</div>
+      </h2>
+      <div tuiAccessories>
+        <tui-avatar
+          [src]="user.fullName | tuiInitials"
+          [style.background]="user.fullName | tuiAutoColor" 
+          size="xxl"
+        />
+      </div>
+    </header>
+    <hr>
+    <h3 tuiTitle="m">Основная информация</h3>
+    <label tuiCell>
+      <tui-avatar
+        size="m"
+        src="@tui.calendar-1"
+      />
+      <div tuiTitle>
+        <strong>{{ getTypeStudentEntity(user).birthDate | date : 'longDate' }} ({{ getTypeStudentEntity(user).birthDate | age | declension : 'год' : 'года' : 'лет' }})</strong>
+        <span tuiSubtitle>Дата рождения</span>
+      </div>
+    </label>
+    <label tuiCell>
+      <tui-avatar
+        size="m"
+        src="@tui.phone"
+      />
+      <div tuiTitle>
+        <strong>{{ user.phone }}</strong>
+        <span tuiSubtitle>Номер телефона</span>
+      </div>
+    </label>
+    <label tuiCell>
+      <tui-avatar
+        size="m"
+        src="@tui.at-sign"
+      />
+      <div tuiTitle>
+        <strong>{{ user.email }}</strong>
+        <span tuiSubtitle>Электронная почта</span>
+      </div>
+    </label>
+    <hr>
+    <h3 tuiTitle="m">Информация о родителях</h3>
+    <label tuiCell>
+      <tui-avatar
+        size="m"
+        src="@tui.circle-user-round"
+      />
+      <div tuiTitle>
+        <strong>{{ getTypeStudentEntity(user).parentFullName }}</strong>
+        <span tuiSubtitle>Полное имя</span>
+      </div>
+    </label>
+    <label tuiCell>
+      <tui-avatar
+        size="m"
+        src="@tui.phone"
+      />
+      <div tuiTitle>
+        <strong>{{ getTypeStudentEntity(user).parentPhone }}</strong>
+        <span tuiSubtitle>Номер телефона</span>
+      </div>
+    </label>
+    <hr>
+    <h3 tuiTitle="m">Баланс</h3>
+    <label tuiCell>
+      <tui-avatar
+        size="m"
+        src="@tui.russian-ruble"
+      />
+      <div tuiTitle>
+        <strong>{{ balance }} {{ 'RUB' | tuiCurrency }}</strong>
+        <span tuiSubtitle>Текущий остаток</span>
+      </div>
+      <button
+        appearance=""
+        tuiIconButton
+      ></button>
+      <button
+        appearance="secondary"
+        iconStart="@tui.receipt-text"
+        tuiIconButton
+        type="button"
+        size="m"
+        [style.border-radius.%]="100"
+        (click)="navigateTo(['reports', 'mutual-settlements'], { queryParams: { studentId: user.id }})"
+      ></button>
+      <button
+        appearance="positive"
+        iconStart="@tui.receipt-russian-ruble"
+        tuiIconButton
+        type="button"
+        size="m"
+        [style.border-radius.%]="100"
+        (click)="showDialog(depositTemplate, 'Пополнение счета', 's')"
+      ></button>
+    </label>
+  }
+</div>
+
+<ng-template #depositTemplate let-observer>
+  <form [formGroup]="depositGroup" (submit)="deposit(observer)">
+    <div class="tui-form__header"></div>
+    <div class="tui-row tui-row_sme">
+      <div class="tui-col_12">
+        <div class="tui-form__row">
+          <tui-input-number
+            formControlName="sum"
+            [tuiTextfieldPostfix]="'RUB' | tuiCurrency"
+          >
+            Сумма пополнения 
+            <input tuiTextfieldLegacy />
+          </tui-input-number>
+        </div>
+      </div>
+    </div>
+    <div class="tui-form__buttons">
+      <button size="l" tuiButton type="submit" class="tui-form__button">
+        Пополнить
+      </button>
+      <button
+        appearance="flat"
+        size="l"
+        tuiButton
+        type="button"
+        class="tui-form__button"
+        (click)="observer.complete()"
+      >
+        Отмена
+      </button>
+    </div>
+  </form>
+</ng-template>

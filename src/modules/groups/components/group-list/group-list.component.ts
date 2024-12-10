@@ -5,62 +5,55 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   TuiAlertService,
   TuiAppearance,
+  TuiAutoColorPipe,
   TuiButton,
   TuiDialogContext,
   TuiDialogService,
   TuiError,
-  TuiIcon,
   TuiTextfield,
   TuiTitle,
 } from '@taiga-ui/core';
 import {
   TUI_CONFIRM,
-  TuiAccordion,
-  TuiAccordionItem,
-  TuiAvatar,
-  TuiButtonGroup,
   TuiConfirmData,
   TuiFieldErrorPipe,
+  TuiPagination,
   TuiSkeleton,
 } from '@taiga-ui/kit';
-import { TuiCardLarge, TuiHeader, TuiSearch } from '@taiga-ui/layout';
-import { switchMap } from 'rxjs';
-import { GroupService } from '../../services/group.service';
+import { TuiCardLarge, TuiCell, TuiHeader, TuiSearch } from '@taiga-ui/layout';
 import { GroupEntity } from '../../../../app/shared/models/entity/group.entity';
 import { GroupMapper } from '../../../../app/shared/models/mapper/group.mapper';
 import type { PolymorpheusContent } from '@taiga-ui/polymorpheus';
 import { AsyncPipe } from '@angular/common';
 import { TuiInputModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
-import { CreateGroupRequest } from '../../../../app/shared/models/requests/create-group-request';
+import { CreateGroupRequest } from '../../../../app/shared/models/requests/create-group.request';
+import { FacadeService } from '../../../../app/shared/services/facade.service';
 
 @Component({
   selector: 'app-group-list',
   standalone: true,
   imports: [
-    TuiAccordion,
-    TuiAccordionItem,
     TuiAppearance,
     TuiCardLarge,
     TuiSearch,
     TuiTextfield,
     ReactiveFormsModule,
     TuiButton,
-    TuiAvatar,
     TuiHeader,
     TuiTitle,
-    TuiButtonGroup,
-    TuiIcon,
-    RouterLink,
     TuiError,
     TuiFieldErrorPipe,
     AsyncPipe,
     TuiInputModule,
     TuiTextfieldControllerModule,
     TuiSkeleton,
+    TuiCell,
+    TuiAutoColorPipe,
+    TuiPagination,
   ],
   templateUrl: './group-list.component.html',
   styleUrl: './group-list.component.less',
@@ -68,71 +61,55 @@ import { CreateGroupRequest } from '../../../../app/shared/models/requests/creat
 })
 export class GroupListComponent implements OnInit {
   
-  private readonly dialogs = inject(TuiDialogService);
-  private readonly alerts = inject(TuiAlertService);
-
-  constructor(
-    private router: Router,
-    private groupService: GroupService,
-    private cdr: ChangeDetectorRef,
-  ) {}
-
   protected skeletonGroups: boolean = true;
 
-  protected groups: Array<GroupEntity> = new Array();
-  protected selectedGroup: GroupEntity | null = null;
+  protected length = 1;
+  protected index = 1;
 
-  protected readonly createGroupForm = new FormGroup({
-    nameValue: new FormControl('', { validators: [Validators.required], nonNullable: true } ),
-  });
+  protected groups: Array<GroupEntity> = new Array;
+
+  private readonly dialogs = inject(TuiDialogService);
+  private readonly alerts = inject(TuiAlertService);
 
   protected readonly searchForm = new FormGroup({
     search: new FormControl(),
   });
 
+  protected readonly createGroupForm = new FormGroup({
+    nameValue: new FormControl('', { validators: [Validators.required], nonNullable: true } ),
+  });
+  
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private router: Router,
+    private facadeService: FacadeService,
+  ) {}
+
   ngOnInit(): void {
     this.getGroups();
   }
 
-  private getGroups() {
+  protected getGroups() {
     this.skeletonGroups = true;
-    this.groupService.getGroups().subscribe({
+    this.facadeService.getGroups().subscribe({
       next: (next) => {
         this.groups = new Array;
-        next.data.map((groupDto) => this.groups.push(GroupMapper.mapToEntity(groupDto)));
+        next.data.map((dto) => this.groups.push(GroupMapper.mapToEntity(dto)));
         this.skeletonGroups = false;
-        this.cdr.detectChanges();
       },
+      error: (response) => this.showAlert("Ошибка", response.error.message, "negative", 5000),
+      complete: () => this.cdr.detectChanges()
     });
   }
 
-  selectGroup(selectedGroup: GroupEntity) {
-    this.selectedGroup = selectedGroup;
+  protected approveGroupDeletion(group: GroupEntity) {
+    const data: TuiConfirmData = { content: `Вы действительно хотите удалить группу <b>${group.name}</b>?`, yes: 'Да', no: 'Отмена' };
+    this.dialogs.open<boolean>(TUI_CONFIRM, { label: 'Подтвердите действие', size: 's', data }).subscribe({
+      next: () => this.alerts.open('Функционал пока не реализован').subscribe()
+    });
   }
 
-  approveGroupDeletion() {
-    const data: TuiConfirmData = {
-      content: `Вы действительно хотите удалить группу <b>${this.selectedGroup?.name}</b>?`,
-      yes: 'Да',
-      no: 'Отмена',
-    };
-
-    this.dialogs
-      .open<boolean>(TUI_CONFIRM, {
-        label: 'Подтвердите действие',
-        size: 's',
-        data,
-      })
-      .subscribe({
-        next: () => this.deleteGroup() 
-      });
-  }
-
-  private deleteGroup() {
-    this.alerts.open('Not implemented yet').subscribe();
-  }
-
-  changeRoute(route: String) {
+  protected changeRoute(route: String) {
     this.router.navigate(['group/', route]);
   }
 
@@ -140,17 +117,25 @@ export class GroupListComponent implements OnInit {
     this.dialogs.open(content, { label: 'Новая группа' }).subscribe();
   }
 
-  createGroup(observer: any) {
+  protected createGroup(observer: any) {
     const request: CreateGroupRequest = {
       name: this.createGroupForm.controls.nameValue.value
     };
 
-    this.groupService.createGroup(request).subscribe({
+    this.facadeService.createGroup(request).subscribe({
       next: () => {
-        this.alerts.open(`Группа <b>${request.name}</b> успешно создана`, { autoClose: 3000, label: 'Успех', appearance: 'positive' }).subscribe();
+        this.showAlert("Успех", `Группа <b>${request.name}</b> успешно создана`, "positive", 3000);
         observer.complete();
+        this.cdr.detectChanges();
       },
-      error: (error) => this.alerts.open(error, { autoClose: 5000, label: 'Ошибка', appearance: 'negative' }).subscribe(),
+      error: (response) => { 
+        this.showAlert("Ошибка", response.error.message, "negative", 5000);
+        this.cdr.detectChanges();
+      }
     });
+  }
+
+  private showAlert(label: string, data: string, appearance: string, autoClose: number) {
+    this.alerts.open(data, { appearance, label, autoClose }).subscribe();
   }
 }

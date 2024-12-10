@@ -1,24 +1,27 @@
-import { TuiAlertService, tuiDateFormatProvider, tuiDialog, TuiRoot } from '@taiga-ui/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, LOCALE_ID, OnInit } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
-import { RouterLink } from '@angular/router';
-import { registerLocaleData } from '@angular/common';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { tuiAsPortal, TuiPortals } from '@taiga-ui/cdk';
 import {
+  TuiAlertService,
+  TuiAppearance,
   TuiButton,
   TuiDataList,
+  tuiDialog,
   TuiDropdown,
+  TuiDropdownService,
+  TuiIcon,
+  TuiRoot,
 } from '@taiga-ui/core';
 import {
+  TuiChevron,
   TuiTabs,
 } from '@taiga-ui/kit';
 import { TuiNavigation } from '@taiga-ui/layout';
-import { LoginDialogComponent } from './shared/components/login-dialog/login-dialog.component';
-import { UserService } from '../modules/users/services/user.service';
 import { UserEntity } from './shared/models/entity/user.entity';
+import { FacadeService } from './shared/services/facade.service';
+import { LoginDialogComponent } from './shared/components/login-dialog/login-dialog.component';
 import { UserMapper } from './shared/models/mapper/user.mapper';
-import localeRu from '@angular/common/locales/ru';
-registerLocaleData(localeRu);
 
 @Component({
   selector: 'app-root',
@@ -28,68 +31,78 @@ registerLocaleData(localeRu);
     TuiRoot,
     FormsModule,
     RouterLink,
+    RouterLinkActive,
+    TuiAppearance,
     TuiButton,
+    TuiChevron,
+    TuiIcon,
     TuiDataList,
     TuiDropdown,
     TuiNavigation,
     TuiTabs,
-    TuiRoot
 ],
-  providers: [
-    tuiDateFormatProvider({ mode: 'DMY', separator: '.' }),
-    { provide: LOCALE_ID, useValue: 'ru-RU'},
-  ],
+  providers: [TuiDropdownService, tuiAsPortal(TuiDropdownService)],
   templateUrl: './app.component.html',
   styleUrl: './app.component.less',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit {
+export class AppComponent extends TuiPortals implements OnInit {
+  
+  protected open = false;
+  protected expanded = true;
+  protected currentUser: UserEntity | null = null;
+  protected profileDropdownState: boolean = false;
 
   private readonly alerts = inject(TuiAlertService);
 
-  protected color = false;
-  protected currentUser: UserEntity | null = null;
-  protected profileDropdownState = false;
+  private readonly loginDialog = tuiDialog(LoginDialogComponent, {
+    dismissible: false,
+  });
 
   constructor(
+    private cdr: ChangeDetectorRef,
     private router: Router,
-    private userService: UserService,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private facadeService: FacadeService
+  ) {
+    super();
+  }
 
   ngOnInit(): void {
     this.me();
   }
 
-  private me() {
-    this.userService.me().subscribe({
-      next: (next) => {
-        this.currentUser = UserMapper.mapToEntity(next.data);
+  protected me() {
+    this.facadeService.me().subscribe({
+      next: (response) => {
+        this.currentUser = UserMapper.mapToEntity(response.data);
         this.cdr.detectChanges();
       }
     });
   }
 
-  private readonly dialog = tuiDialog(LoginDialogComponent, {
-    dismissible: true,
-  });
-
-  protected showLoginDialog(): void {
-    this.dialog(0).subscribe({
-      complete: () => this.me()
-    });
-  }
-
-  logout(): void {
-    this.userService.logout().subscribe({
+  protected logout() {
+    this.facadeService.logout().subscribe({
       next: () => {
-        this.alerts.open(`Выполнен выход из аккаунта`, { appearance: "positive", label: "Успех", autoClose: 3000 }).subscribe();
+        this.showAlert("Успех", "Выполнен выход из аккаунта", "positive", 3000);
         this.profileDropdownState = false;
         this.currentUser = null;
         this.router.navigate(['/']);
         this.cdr.detectChanges();
       },
-      error: (error) => this.alerts.open(error.error.message, { appearance: "negative", label: "Ошибка", autoClose: 5000 }).subscribe()
+      error: (response) => {
+        this.showAlert("Ошибка", response.error.message, "negative", 5000);
+        this.cdr.detectChanges();
+      }
     });
+  }
+
+  protected showLoginDialog() {
+    this.loginDialog(0).subscribe({
+      complete: () => this.me()
+    });
+  }
+
+  private showAlert(label: string, data: string, appearance: string, autoClose: number) {
+    this.alerts.open(data, { appearance, label, autoClose }).subscribe();
   }
 }

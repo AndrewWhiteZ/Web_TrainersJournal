@@ -3,14 +3,14 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TuiButton, TuiLabel, TuiTextfield, TuiIcon, TuiError, TuiDialogContext, TuiAlertService, tuiNumberFormatProvider, TuiGroup } from '@taiga-ui/core';
 import { TuiPassword, TuiFieldErrorPipe, TuiTabs, TuiDataListWrapper, TuiRadio, TuiStepper, TuiRadioList } from '@taiga-ui/kit';
-import { SignInRequest } from '../../models/requests/sign-in-request';
+import { SignInRequest } from '../../models/requests/sign-in.request';
 import { injectContext } from '@taiga-ui/polymorpheus';
-import { SignUpRequest } from '../../models/requests/sign-up-request';
+import { SignUpRequest } from '../../models/requests/sign-up.request';
 import { TuiInputDateModule, TuiInputModule, TuiInputNumberModule, tuiInputNumberOptionsProvider, TuiInputPhoneModule, TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { UserService } from '../../../../modules/users/services/user.service';
 import { UserRole } from '../../models/enum/user-role.enum';
 import { TuiDay } from '@taiga-ui/cdk';
-import { StudentSignUpRequest } from '../../models/requests/student-sign-up-request';
+import { StudentSignUpRequest } from '../../models/requests/student-sign-up.request';
 
 export interface UserRoleSpec {
   apiName: string;
@@ -35,7 +35,6 @@ export function getUserRoleSpec(userRole: UserRole): UserRoleSpec {
     TuiDataListWrapper,
     TuiError,
     TuiFieldErrorPipe,
-    TuiGroup,
     TuiInputDateModule,
     TuiInputModule,
     TuiInputNumberModule,
@@ -107,34 +106,34 @@ export class LoginDialogComponent {
   }
 
   protected submitSignUp(): void {
-    const commonRequest: SignUpRequest = {
-      login: this.signUpForm.controls.loginValue.value ?? "",
-      fullName: this.signUpForm.controls.fullNameValue.value ?? "",
-      email: this.signUpForm.controls.emailValue.value ?? "",
-      phone: this.signUpForm.controls.phoneValue.value ?? "",
-      password: this.signUpForm.controls.passwordValue.value ?? "",
-      role: getUserRoleSpec(this.signUpForm.controls.roleValue.value as UserRole).apiName ?? "",
-    };
+    // const commonRequest: SignUpRequest = {
+    //   login: this.signUpForm.controls.loginValue.value ?? "",
+    //   fullName: this.signUpForm.controls.fullNameValue.value ?? "",
+    //   email: this.signUpForm.controls.emailValue.value ?? "",
+    //   phone: this.signUpForm.controls.phoneValue.value ?? "",
+    //   password: this.signUpForm.controls.passwordValue.value ?? "",
+    //   role: getUserRoleSpec(this.signUpForm.controls.roleValue.value as UserRole[]).apiName ?? "",
+    // };
 
-    let request: SignUpRequest | StudentSignUpRequest = commonRequest;
-    if (this.signUpForm.controls.roleValue.value === UserRole.STUDENT) {
-      request = { 
-        ...commonRequest,
-        beltLevel: this.signUpForm.controls.beltLevelValue.value ?? 0,
-        birthDate: String(this.signUpForm.controls.birthDateValue.value?.toJSON()),
-        parentFullName: this.signUpForm.controls.parentFullNameValue.value ?? "",
-        parentPhone: this.signUpForm.controls.parentPhoneValue.value ?? "",
-      };
-    }
+    //let request: SignUpRequest | StudentSignUpRequest = commonRequest;
+    // if (this.signUpForm.controls.roleValue.value === UserRole.STUDENT) {
+    //   request = { 
+    //     ...commonRequest,
+    //     beltLevel: this.signUpForm.controls.beltLevelValue.value ?? 0,
+    //     birthDate: String(this.signUpForm.controls.birthDateValue.value?.toJSON()),
+    //     parentFullName: this.signUpForm.controls.parentFullNameValue.value ?? "",
+    //     parentPhone: this.signUpForm.controls.parentPhoneValue.value ?? "",
+    //   };
+    // }
 
-    this.userService.register(request).subscribe({
-      next: (next) => {
-        this.alerts.open(`Пользователь <b>${next.data.fullName}</b> зарегистрирован`, { appearance: "positive", label: "Успех", autoClose: 3000 }).subscribe();
-        this.context.completeWith(null);
-      },
-      error: (error) => 
-        this.alerts.open(error.error.message, { appearance: "negative", label: "Ошибка", autoClose: 5000 }).subscribe()
-    });
+    // this.userService.register(request).subscribe({
+    //   next: (next) => {
+    //     this.alerts.open(`Пользователь <b>${next.data.fullName}</b> зарегистрирован`, { appearance: "positive", label: "Успех", autoClose: 3000 }).subscribe();
+    //     this.context.completeWith(null);
+    //   },
+    //   error: (error) => 
+    //     this.alerts.open(error.error.message, { appearance: "negative", label: "Ошибка", autoClose: 5000 }).subscribe()
+    // });
   }
 
   protected reset(): void {

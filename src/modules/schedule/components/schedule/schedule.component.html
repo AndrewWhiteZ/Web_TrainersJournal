@@ -1,121 +1,136 @@
-<search tuiSearch>
-  <form [formGroup]="searchForm">
-    <fieldset tuiTextfieldSize="l">
-      <tui-textfield iconStart="@tui.search">
-        <input
-          formControlName="search"
-          placeholder="Название группы"
-          tuiTextfield
-          (click)="showSelectionDialog()"
-        />
-      </tui-textfield>
-      <button
-        size="l"
-        tuiButton
-        iconStart="@tui.circle-plus"
-        appearance="positive"
-        type="button"
-        (click)="showDialog(createLessonTemplate, 'Новое занятие', 'm')"
-      >
-        Создать
-      </button>
-      <button
-        size="l"
-        tuiIconButton
-        iconStart="@tui.calendar-plus-2"
-        appearance="negative"
-        type="button"
-        (click)="showDialog(scheduleLessonsTemplate, 'Планирование занятий', 'l')"
-      ></button>
-    </fieldset>
-  </form>
-</search>
-@if (selectedGroup === null) {
-  <div tuiAppearance="floating" tuiCardLarge tuiConnected>
-    <tui-block-status size="l">
-      <div tuiHeader="l">
-        <h3 tuiTitle>Для просмотра расписания выберите группу</h3>
-      </div>
-      <button
-        appearance="primary"
-        size="xl"
-        tuiButton
-        type="button"
-        (click)="showSelectionDialog()"
-      >
-        Выбрать
-      </button>
-    </tui-block-status>
+<div tuiAppearance="floating" tuiCardLarge tuiConnected>                            
+  <div tuiHeader="l">
+    <h1 tuiTitle="l">Расписание</h1>
   </div>
-} @else if (lessons.length > 0) {
-  @for(lessonByDay of lessonsByDays; track $index) {
+  <search tuiSearch>
+    <form [formGroup]="searchForm">
+      <fieldset tuiTextfieldSize="m">
+        <tui-textfield iconStart="@tui.search">
+          <input
+            formControlName="search"
+            placeholder="Название группы"
+            tuiTextfield
+            (click)="showSelectionDialog()"
+          />
+        </tui-textfield>
+        <button
+          size="m"
+          tuiButton
+          iconStart="@tui.circle-plus"
+          appearance="positive"
+          type="button"
+          (click)="showDialog(createLessonTemplate, 'Новое занятие', 'm')"
+        >
+          Создать занятие
+        </button>
+        <button
+          size="m"
+          tuiIconButton
+          iconStart="@tui.calendar-plus-2"
+          appearance="negative"
+          type="button"
+          (click)="showDialog(scheduleLessonsTemplate, 'Планирование занятий', 'l')"
+        ></button>
+      </fieldset>
+    </form>
+  </search>
+  <hr>
+  @if (selectedGroup === null) {
     <div tuiAppearance="floating" tuiCardLarge tuiConnected>
+      <tui-block-status size="l">
+        <div tuiHeader="l">
+          <h3 tuiTitle>Для просмотра расписания выберите группу</h3>
+        </div>
+        <button
+          appearance="primary"
+          size="xl"
+          tuiButton
+          type="button"
+          (click)="showSelectionDialog()"
+        >
+          Выбрать
+        </button>
+      </tui-block-status>
+    </div>
+  } @else if (lessons.length > 0) {
+    @for(lessonByDay of lessonsByDays; track $index) {
       <h3 tuiTitle="m">{{ lessonByDay.day | date: 'longDate' }}</h3>
-      @for (lesson of lessonByDay.lessons; track $index) {
-        <button tuiCell type="button">
-          <tui-avatar appearance="secondary" src="@tui.clock-2" />
-          <span tuiTitle>
-            {{ lesson.startTime | date: 'shortTime' }}
-            <span tuiSubtitle>{{ lesson.endTime | date: 'shortTime' }}</span>
-          </span>
+      @for(lesson of lessons; track $index) {
+        <label tuiCell>
+          <tui-avatar
+            appearance="secondary"
+            size="m"
+            src="@tui.clock"
+          />
+          <div tuiTitle>
+            {{ lesson.startTime | date: 'shortTime' }} – {{ lesson.endTime | date: 'shortTime' }}
+            <span tuiSubtitle>Занятие</span>
+          </div>
           <button
-            appearance="icon"
+            appearance="action-grayscale"
             iconStart="@tui.user-round-check"
             tuiIconButton
             type="button"
+            size="m"
+            [style.border-radius.%]="100"
             (click)="showAttendanceDialog(selectedGroup, lesson)"
           ></button>
           <button
-            appearance="icon"
+            appearance="action-destructive"
             iconStart="@tui.circle-x"
             tuiIconButton
             type="button"
+            size="m"
             (click)="approveLessonCancelation(lesson)"
           ></button>
-        </button>
+        </label>
       }
+    }
+  } @else {
+    <div tuiAppearance="floating" tuiCardLarge tuiConnected>
+      <tui-block-status size="l">
+        <div tuiHeader="l">
+          <h3 tuiTitle>
+            Для выбранной группы нет ни одного запланированного занятия
+          </h3>
+        </div>
+        <div
+          class="tui-form__buttons tui-form__buttons_align_center"
+        >
+          <button
+            appearance="positive"
+            size="xl"
+            tuiButton
+            type="button"
+            iconStart="@tui.badge-plus"
+            class="tui-form__button"
+            (click)="showDialog(createLessonTemplate, 'Новое занятие', 'm')"
+          >
+            Создать новое занятие
+          </button>
+          <button
+            appearance="negative"
+            size="xl"
+            tuiButton
+            type="button"
+            iconStart="@tui.calendar-plus-2"
+            class="tui-form__button"
+            (click)="
+              showDialog(scheduleLessonsTemplate, 'Планирование занятий', 'l')
+            "
+          >
+            Запланировать на период
+          </button>
+        </div>
+      </tui-block-status>
     </div>
   }
-} @else {
-  <div tuiAppearance="floating" tuiCardLarge tuiConnected>
-    <tui-block-status size="l">
-      <div tuiHeader="l">
-        <h3 tuiTitle>
-          Для выбранной группы нет ни одного запланированного занятия
-        </h3>
-      </div>
-      <div
-        class="tui-form__buttons tui-form__buttons_align_center"
-        style="margin-bottom: 0"
-      >
-        <button
-          appearance="positive"
-          size="xl"
-          tuiButton
-          type="button"
-          iconStart="@tui.badge-plus"
-          class="tui-form__button"
-          (click)="showDialog(createLessonTemplate, 'Новое занятие', 'm')"
-        >
-          Создать новое занятие
-        </button>
-        <button
-          appearance="negative"
-          size="xl"
-          tuiButton
-          type="button"
-          iconStart="@tui.calendar-plus-2"
-          class="tui-form__button"
-          (click)="
-            showDialog(scheduleLessonsTemplate, 'Планирование занятий', 'l')
-          "
-        >
-          Запланировать на период
-        </button>
-      </div>
-    </tui-block-status>
-  </div>
-}
+  <tui-pagination
+    size="l"
+    [index]="index"
+    [length]="length"
+  />
+</div>
 
 <ng-template #createLessonTemplate let-observer>
   <form [formGroup]="createLessonGroup" (submit)="createLesson(observer)">

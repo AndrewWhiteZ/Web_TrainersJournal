@@ -1,87 +1,73 @@
-<div style="display: flex; align-items: stretch; gap: 16px">
-  <div style="width: 100%;">
-    <search tuiSearch>
-      <form [formGroup]="searchForm">
-        <fieldset tuiTextfieldSize="m">
-          <tui-textfield iconStart="@tui.search">
-            <input
-              formControlName="search"
-              placeholder="Название группы"
-              tuiTextfield />
-          </tui-textfield>
-          <button
-            size="m"
-            tuiIconButton
-            iconStart="@tui.search"
-            appearance="secondary"
-            type="button"
-            [style.border-radius.%]="100">
-            Поиск
-          </button>
-          <button
-            size="m"
-            tuiButton
-            iconStart="@tui.circle-plus"
-            appearance="positive"
-            type="button"
-            (click)="showDialog(createGroupTemplate)">
-            Создать
-          </button>
-        </fieldset>
-      </form>
-    </search>
-    <tui-accordion class="container" style="margin-top: 16px;">
-      @if (skeletonGroups) {
-        <tui-accordion-item [tuiSkeleton]="skeletonGroups"></tui-accordion-item>
-        <tui-accordion-item [tuiSkeleton]="skeletonGroups"></tui-accordion-item>
-        <tui-accordion-item [tuiSkeleton]="skeletonGroups"></tui-accordion-item>
-      } @else {
-        @for (group of this.groups; track $index) {
-          <tui-accordion-item [showArrow]="false" (click)="selectGroup(group)"
-            (dblclick)="changeRoute(group.id)"
-            [style.background]="(group == selectedGroup) ? 'AliceBlue' : ''">
-            {{ group.name }}
-          </tui-accordion-item>
-        }
-      }
-    </tui-accordion>
+<div tuiAppearance="floating" tuiCardLarge>                            
+  <div tuiHeader="l">
+    <h1 tuiTitle="l">Список групп</h1>
   </div>
-  @if(selectedGroup !== null) {
-  <div
-    tuiAppearance="floating"
-    tuiCardLarge
-    style="width: 25%;">
-    <header tuiHeader>
-      <h1 tuiTitle>
-        <div tuiCaption>Группа</div>
-        {{ selectedGroup.name }}
-      </h1>
-      <aside tuiAccessories>
-        <tui-avatar
-          appearance="primary"
-          size="m"
-          src="@tui.users-round" />
-      </aside>
-    </header>
-    <footer>
-      <div
-        tuiAppearance="floating"
-        tuiButtonGroup>
+  <search tuiSearch>
+    <form [formGroup]="searchForm">
+      <fieldset tuiTextfieldSize="m">
+        <tui-textfield iconStart="@tui.search">
+          <input
+            formControlName="search"
+            placeholder="Название группы"
+            tuiTextfield />
+        </tui-textfield>
         <button
+          size="m"
+          tuiButton
+          iconStart="@tui.circle-plus"
+          appearance="positive"
           type="button"
-          [routerLink]="'/group/' + selectedGroup.id">
-          <tui-icon icon="@tui.pencil" />
-          Изменить
+          (click)="showDialog(createGroupTemplate)"
+        >
+          Создать
         </button>
-        <button type="button"
-          (click)="approveGroupDeletion()">
-          <tui-icon icon="@tui.circle-x" />
-          Удалить
-        </button>
+      </fieldset>
+    </form>
+  </search>
+  <hr>
+  @for (group of this.groups; track $index) {
+    <label tuiCell (dblclick)="changeRoute(group.id)">
+      <button
+        appearance="secondary-grayscale"
+        iconStart="@tui.group"
+        tuiIconButton
+        type="button"
+        size="m"
+        [tuiSkeleton]="skeletonGroups"
+        [style.border-radius.%]="100"
+        [style.background]="group.name | tuiAutoColor"
+      ></button>
+      <div tuiTitle>
+        <span [tuiSkeleton]="skeletonGroups && 10">{{ group.name }}</span>
       </div>
-    </footer>
-  </div>
+      <button
+        appearance="secondary"
+        iconStart="@tui.pencil"
+        tuiIconButton
+        type="button"
+        size="m"
+        [tuiSkeleton]="skeletonGroups"
+        [style.border-radius.%]="100"
+        (click)="changeRoute(group.id)"
+      ></button>
+      <button
+        appearance="secondary-destructive"
+        iconStart="@tui.trash-2"
+        tuiIconButton
+        type="button"
+        size="m"
+        [tuiSkeleton]="skeletonGroups"
+        [style.border-radius.%]="100"
+        (click)="approveGroupDeletion(group)"
+      ></button>
+    </label>
   }
+
+  <tui-pagination
+    size="l"
+    [index]="index"
+    [length]="length"
+  />
 </div>
 
 <ng-template

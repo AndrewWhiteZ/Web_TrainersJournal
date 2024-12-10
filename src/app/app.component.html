@@ -1,96 +1,134 @@
 <tui-root>
-<tui-root>
   <header tuiNavigationHeader>
     <button
-      appearance="secondary-grayscale"
-      iconStart="@tui.home"
-      tuiButton
       type="button"
-      routerLink="/">
-      Главная
+      tuiIconButton
+      tuiNavigationDrawer
+      [iconStart]="expanded ? '@tui.x' : '@tui.menu'"
+      [(open)]="open"
+    >
+      <aside [tuiNavigationAside]="true">
+        <a iconStart="@tui.group" tuiAsideItem [routerLink]="'/groups'">
+          Группы
+        </a>
+        <a iconStart="@tui.users" tuiAsideItem [routerLink]="'/users'">
+          Пользователи
+        </a>
+        <a
+          iconStart="@tui.calendar-days"
+          tuiAsideItem
+          [routerLink]="'/schedule'"
+        >
+          Расписание
+        </a>
+        <tui-aside-group>
+          <button
+            iconStart="@tui.file-chart-line"
+            tuiAsideItem
+            tuiChevron
+            type="button"
+          >
+            Отчеты
+            <ng-template>
+              <a iconStart="@tui.calendar-check" tuiAsideItem [routerLink]="'/attendance-report'">
+                Посещаемость
+              </a>
+              <a iconStart="@tui.chart-candlestick" tuiAsideItem [routerLink]="'/reports/mutual-settlements'">
+                Взаиморасчеты
+              </a>
+            </ng-template>
+          </button>
+        </tui-aside-group>
+      </aside>
     </button>
-    <button
-      appearance="secondary-grayscale"
-      iconStart="@tui.users"
-      tuiButton
-      type="button"
-      routerLink="/groups">
-      Группы
-    </button>
-    <button
-      appearance="secondary-grayscale"
-      iconStart="@tui.users"
-      tuiButton
-      type="button"
-      routerLink="/users">
-      Пользователи
-    </button>
-    <button
-      appearance="secondary-grayscale"
-      iconStart="@tui.calendar-check-2"
-      tuiButton
-      type="button"
-      routerLink="/schedule">
-      Расписание
-    </button>
-    <button
-      appearance="secondary-grayscale"
-      iconStart="@tui.russian-ruble"
-      tuiButton
-      type="button"
-      routerLink="/accounting">
-      Взаиморасчеты
-    </button>
+    <span tuiNavigationLogo>
+      <tui-icon icon="@tui.home"/>
+      <span tuiFade>Журнал тренера</span>
+    </span>
     <hr />
     @if(currentUser) {
-    <button
-      appearance="secondary-grayscale"
-      iconStart="@tui.user"
-      tuiButton
-      tuiDropdownAlign="center"
-      type="button"
-      [tuiAppearanceState]="profileDropdownState ? 'active' : null"
-      [tuiDropdown]="profileDropdown"
-      [(tuiDropdownOpen)]="profileDropdownState">
-      Мой профиль
-    </button>
-    <ng-template
-      #profileDropdown
-      let-close>
-      <tui-data-list>
-        <tui-opt-group>
-          <button
-            tuiOption
-            type="button"
-            iconStart="@tui.user"
-            routerLink="/profile"
-            (click)="profileDropdownState = false">
-            {{ currentUser.fullName }}
-          </button>
-        </tui-opt-group>
-        <tui-opt-group>
-          <button
-            tuiOption
-            type="button"
-            (click)="logout()">
-            Выйти из профиля
-          </button>
-        </tui-opt-group>
-      </tui-data-list>
-    </ng-template>
-    } @else {
-    <button
-      appearance="secondary-grayscale"
-      iconStart="@tui.log-in"
-      tuiButton
-      type="button"
-      (click)="showLoginDialog()">
-      Войти
-    </button>
+      <button
+        appearance="secondary-grayscale"
+        iconStart="@tui.user"
+        tuiButton
+        tuiDropdownAlign="center"
+        type="button"
+        [tuiAppearanceState]="profileDropdownState ? 'active' : null"
+        [tuiDropdown]="profileDropdown"
+        [(tuiDropdownOpen)]="profileDropdownState">
+        Мой профиль
+      </button>
+      <ng-template
+        #profileDropdown
+        let-close>
+        <tui-data-list>
+          <tui-opt-group>
+            <button
+              tuiOption
+              type="button"
+              iconStart="@tui.user"
+              routerLink="/profile"
+              (click)="profileDropdownState = false">
+              {{ currentUser.fullName }}
+            </button>
+          </tui-opt-group>
+          <tui-opt-group>
+            <button
+              tuiOption
+              type="button"
+              (click)="logout()">
+              Выйти из профиля
+            </button>
+          </tui-opt-group>
+        </tui-data-list>
+      </ng-template>
+      } @else {
+      <button
+        appearance="secondary-grayscale"
+        iconStart="@tui.log-in"
+        tuiButton
+        type="button"
+        (click)="showLoginDialog()">
+        Войти
+      </button>
     }
   </header>
-  <main tuiNavigationMain style="padding: 12px;">
-    <router-outlet></router-outlet>
-  </main>
-</tui-root>
+  <div [style.display]="'flex'">
+    <aside [tuiNavigationAside]="false">
+      <a iconStart="@tui.group" tuiAsideItem [routerLink]="'/groups'">
+        Группы
+      </a>
+      <a iconStart="@tui.users" tuiAsideItem [routerLink]="'/users'">
+        Пользователи
+      </a>
+      <a
+        iconStart="@tui.calendar-days"
+        tuiAsideItem
+        [routerLink]="'/schedule'"
+      >
+        Расписание
+      </a>
+      <tui-aside-group>
+        <button
+          iconStart="@tui.file-chart-line"
+          tuiAsideItem
+          tuiChevron
+          type="button"
+        >
+          Отчеты
+          <ng-template>
+            <a iconStart="@tui.calendar-check" tuiAsideItem [routerLink]="'/attendance-report'">
+              Посещаемость
+            </a>
+            <a iconStart="@tui.chart-candlestick" tuiAsideItem [routerLink]="'/reports/mutual-settlements'">
+              Взаиморасчеты
+            </a>
+          </ng-template>
+        </button>
+      </tui-aside-group>
+    </aside>
+    <main tuiNavigationMain class="tui-space_top-5" style="display: flex; flex-direction: column;">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
 </tui-root>

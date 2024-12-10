@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { SignUpRequest } from '../../../app/shared/models/requests/sign-up-request';
-import { SignInRequest } from '../../../app/shared/models/requests/sign-in-request';
+import { SignUpRequest } from '../../../app/shared/models/requests/sign-up.request';
+import { SignInRequest } from '../../../app/shared/models/requests/sign-in.request';
 import { ApiResponse } from '../../../app/shared/models/response/api.response';
 import { UserDto } from '../../../app/shared/models/dto/user.dto';
 import { EmptyResponse } from '../../../app/shared/models/response/empty.response';

@@ -22,6 +22,10 @@ export class LessonService {
 
   public scheduleGroupLessons(groupId: string, body: ScheduleBatchRequest) {
     return this.http.post<ApiResponse<Array<LessonDto>>>(`/api/v1/groups/${groupId}/schedule/batch`, body);
+  } 
+
+  public getMyLessons() {
+    return this.http.get<ApiResponse<Array<LessonDto>>>(`/api/v1/me/schedule`);
   }
 
 }
