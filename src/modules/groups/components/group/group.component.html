@@ -104,8 +104,39 @@
         <label tuiCell>
           <tui-avatar
             size="m"
-            [src]="student.fullName | tuiInitials"
-            [style.background]="student.fullName | tuiAutoColor"
+            tuiButton
+            type="button"
+            (click)="showSelectionDialog()">
+            <tui-icon
+              icon="@tui.user-round-plus"
+              [style.height.rem]="1" />
+            Добавить
+          </button>
+        </div>
+      </div>
+      
+      @for (student of students; track $index) {
+        <label tuiCell>
+          <tui-avatar
+              size="m"
+              [src]="student.fullName | tuiInitials"
+              [style.background]="student.fullName | tuiAutoColor"
+              [tuiSkeleton]="skeletonStudents"
+            />
+          <div tuiTitle [tuiSkeleton]="skeletonStudents && 10">
+            {{ student.fullName }}
+          </div>
+          <button
+            appearance="icon"
+            tuiIconButton
+            type="button"
+          ></button>
+          <button
+            appearance="icon"
+            iconStart="@tui.trash-2"
+            tuiIconButton
+            type="button"
+            (click)="approveStudentRemoving(student)"
             [tuiSkeleton]="skeletonStudents"
           />
           <div tuiTitle [tuiSkeleton]="skeletonStudents && 10">

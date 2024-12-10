@@ -25,7 +25,6 @@ import { BeltLevelPipe } from '../../../../app/shared/pipes/belt-level.pipe';
 
 @Component({
   selector: 'app-group',
-  standalone: true,
   imports: [
     TuiAvatar,
     TuiHeader,
@@ -35,6 +34,7 @@ import { BeltLevelPipe } from '../../../../app/shared/pipes/belt-level.pipe';
     ReactiveFormsModule,
     TuiInputModule,
     TuiTextfieldControllerModule,
+    TuiTextfield,
     TuiSkeleton,
     TuiCell,
     TuiBadgedContent,
@@ -96,6 +96,12 @@ export class GroupComponent implements OnInit, OnDestroy {
     startTime: new FormControl(TuiDay.currentLocal(), { validators: [Validators.required], nonNullable: true } ),
     endTime: new FormControl(TuiDay.currentLocal(), { validators: [Validators.required], nonNullable: true } ),
     price: new FormControl(0, { validators: [Validators.required], nonNullable: true } ),
+  });
+
+  protected readonly newPriceGroup = new FormGroup({
+    startDate: new FormControl(TuiDay.currentLocal(), { nonNullable: true }),
+    endDate: new FormControl(TuiDay.currentLocal(), { nonNullable: true }),
+    price: new FormControl(0, { nonNullable: true }),
   });
 
   constructor(

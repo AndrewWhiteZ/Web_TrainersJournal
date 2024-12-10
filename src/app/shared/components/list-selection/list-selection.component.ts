@@ -8,15 +8,14 @@ import { ApiResponse } from '../../models/response/api.response';
 import { EmptyResponse } from '../../models/response/empty.response';
 
 @Component({
-  selector: 'app-list-selection',
-  standalone: true,
-  imports: [
-    TuiAccordion,
-    TuiButton,
-    ReactiveFormsModule,
-  ],
-  templateUrl: './list-selection.component.html',
-  styleUrl: './list-selection.component.less',
+    selector: 'app-list-selection',
+    imports: [
+        TuiAccordion,
+        TuiButton,
+        ReactiveFormsModule,
+    ],
+    templateUrl: './list-selection.component.html',
+    styleUrl: './list-selection.component.less'
 })
 export class ListSelectionComponent<T extends { id?: string, name?: string, fullName?: string }> implements OnInit {
   

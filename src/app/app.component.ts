@@ -25,7 +25,6 @@ import { UserMapper } from './shared/models/mapper/user.mapper';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [
     RouterOutlet,
     TuiRoot,
@@ -44,7 +43,7 @@ import { UserMapper } from './shared/models/mapper/user.mapper';
   providers: [TuiDropdownService, tuiAsPortal(TuiDropdownService)],
   templateUrl: './app.component.html',
   styleUrl: './app.component.less',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent extends TuiPortals implements OnInit {
   

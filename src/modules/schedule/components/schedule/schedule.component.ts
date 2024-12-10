@@ -33,7 +33,6 @@ type LessonByDay = {
 
 @Component({
   selector: 'app-schedule',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     TuiAppearance,
