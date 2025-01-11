@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiResponse } from '../../../app/shared/models/response/api.response';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { TransactionDto } from '../../../app/shared/models/dto/transaction.dto';
 import { DepositRequest } from '../../../app/shared/models/requests/deposit.request';
 import { StudentTransactionsDto } from '../../../app/shared/models/dto/student-transactions.dto';
@@ -24,12 +24,18 @@ export class TransactionService {
     return this.http.get<ApiResponse<number>>(`/api/v1/students/${studentId}/balance`);
   }
 
-  public getStudentTransactions(studentId: string) {
-    return this.http.get<ApiResponse<Array<TransactionDto>>>(`/api/v1/students/${studentId}/transactions`);
+  public getStudentTransactions(studentId: string, startTime?: string, endTime?: string) {
+    let params = new HttpParams();
+    if (startTime) params = params.append('startTime', startTime);
+    if (endTime) params = params.append('endTime', endTime);
+    return this.http.get<ApiResponse<StudentTransactionsDto>>(`/api/v1/students/${studentId}/transactions`, { params });
   } 
 
-  public getGroupTransactions(groupId: string) {
-    return this.http.get<ApiResponse<Array<StudentTransactionsDto>>>(`/api/v1/groups/${groupId}/transactions`);
+  public getGroupTransactions(groupId: string, startTime?: string, endTime?: string) {
+    let params = new HttpParams();
+    if (startTime) params = params.append('startTime', startTime);
+    if (endTime) params = params.append('endTime', endTime);
+    return this.http.get<ApiResponse<Array<StudentTransactionsDto>>>(`/api/v1/groups/${groupId}/transactions`, { params });
   }
 
 }

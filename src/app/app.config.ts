@@ -13,6 +13,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(),
     NG_EVENT_PLUGINS,
+        NG_EVENT_PLUGINS,
         NG_EVENT_PLUGINS
     ]
 };

@@ -1,0 +1,44 @@
+.table {
+  table-layout: fixed;
+}
+
+.textarea {
+  min-block-size: var(--tui-height-l);
+}
+
+.first {
+  min-inline-size: 11.25rem;
+  max-inline-size: 11.25rem;
+}
+
+.text {
+  vertical-align: top;
+  padding-top: 1rem;
+}
+
+.border {
+  border-left: none;
+}
+
+.select {
+  inline-size: 6.25rem;
+}
+
+table {
+  inline-size: 100%;
+
+  tr {
+      block-size: 2.8125rem;
+  }
+
+  td {
+      &:first-child {
+          inline-size: 10rem;
+          font-weight: bold;
+      }
+
+      &:last-child {
+          inline-size: 3rem;
+      }
+  }
+}

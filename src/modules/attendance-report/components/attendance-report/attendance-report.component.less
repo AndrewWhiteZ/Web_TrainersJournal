@@ -1,0 +1,23 @@
+.box {
+  inline-size: 100%;
+  block-size: 70vh;
+}
+
+table {
+  inline-size: 100%;
+
+  tr {
+      block-size: 2.8125rem;
+  }
+
+  td {
+      &:first-child {
+          inline-size: 10rem;
+          font-weight: bold;
+      }
+
+      &:last-child {
+          inline-size: 3rem;
+      }
+  }
+}

@@ -1,0 +1,138 @@
+<div tuiAppearance="floating" tuiCardLarge>
+  <div tuiHeader="l">
+    <h1 tuiTitle="l">Список чеков</h1>
+  </div>
+  <search tuiSearch>
+    <form [formGroup]="searchForm">
+      <fieldset tuiTextfieldSize="m">
+        <tui-textfield iconStart="@tui.search">
+          <input
+            formControlName="search"
+            placeholder="Название группы"
+            tuiTextfield />
+        </tui-textfield>
+        @if (isStudent()) {
+          <button
+            size="m"
+            tuiButton
+            iconStart="@tui.file-up"
+            appearance="positive"
+            type="button"
+            (click)="showDialog(uploadBillTemplate)"
+          >
+            Загрузить
+          </button>
+        }
+      </fieldset>
+    </form>
+  </search>
+  <hr>
+  @for (bill of billList; track $index) {
+    <label tuiCell>
+      <tui-avatar
+        size="m"
+        [src]="bill.student.fullName | tuiInitials"
+        [style.background]="bill.student.fullName | tuiAutoColor"
+        [tuiSkeleton]="skeletonBills"
+      />
+      <div tuiTitle [tuiSkeleton]="skeletonBills && 10">
+        {{ bill.student.fullName }}
+        <span tuiSubtitle>
+          <tui-chip size="xxs" [style.background]="bill.student.beltLevel | beltLevelColor">{{ bill.student.beltLevel | beltLevel }}</tui-chip>
+        </span>
+      </div>
+      <tui-badge
+        [appearance]="getAppearanceByBillStatus(bill.status)"
+        size="xl"
+        tuiStatus
+      >
+        {{ bill.status }}
+      </tui-badge>
+      <div tuiTitle>
+        <strong>{{ bill.amount > 0 ? '+' : '' }}{{ bill.amount }} {{ 'RUB' | tuiCurrency }}</strong>
+        <div tuiSubtitle>{{ bill.createdDt | date : 'medium' }}</div>
+      </div>
+      <button
+        appearance="secondary"
+        iconStart="@tui.receipt-russian-ruble"
+        tuiIconButton
+        type="button"
+        size="m"
+        [tuiSkeleton]="skeletonBills"
+        [style.border-radius.%]="100"
+        (click)="changeRoute(bill.id)"
+      ></button>
+    </label>
+  } @empty {
+    <label tuiCell>
+      <tui-avatar
+        size="m"
+        src="@tui.life-buoy"
+        appearance="secondary"
+      />
+      <div tuiTitle>
+        <strong>Не найден ни один чек</strong>
+      </div>
+    </label>
+  }
+</div>
+
+<ng-template
+  #uploadBillTemplate
+  let-observer>
+  <form [formGroup]="uploadBillForm" (submit)="uploadBill(observer)">
+    <div class="tui-row tui-row_sme">
+      <div class="tui-col_12">
+        <div class="tui-form__row">
+          <div class="tui-form__row">
+            <tui-input-number
+              [tuiTextfieldPostfix]="'RUB' | tuiCurrency"
+              formControlName="amount"
+            >
+              Сумма чека
+            </tui-input-number>
+          </div>
+        </div>
+        <div class="tui-form__row">
+          <div class="tui-form__row">
+            <label tuiInputFiles>
+              <input
+                tuiInputFiles
+                accept="image/*"
+                [multiple]="false"
+                formControlName="file"
+                (ngModelChange)="onFileChange()"
+              />
+            </label>
+            @if (choosenFile !== null) {
+              <tui-files class="tui-space_top-1">
+                <tui-file
+                  [file]="choosenFile"
+                  (remove)="removeFile()"
+                />
+              </tui-files>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tui-form__buttons">
+      <button
+        size="l"
+        tuiButton
+        type="submit"
+        class="tui-form__button">
+        Загрузить
+      </button>
+      <button
+        appearance="flat"
+        size="l"
+        tuiButton
+        type="button"
+        class="tui-form__button"
+        (click)="observer.complete()">
+        Отмена
+      </button>
+    </div>
+  </form>
+</ng-template>

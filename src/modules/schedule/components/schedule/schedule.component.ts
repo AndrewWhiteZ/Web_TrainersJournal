@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TuiAlertService, TuiAppearance, TuiButton, tuiDialog, TuiDialogContext, TuiDialogService, TuiDialogSize, TuiTextfield, TuiTitle } from '@taiga-ui/core';
 import { TuiAvatar, TuiBadgedContent, TuiConnected, TuiDataListWrapper, TuiTabs, TUI_CONFIRM, TuiPagination } from '@taiga-ui/kit';
 import { TuiBlockStatus, TuiCardLarge, TuiCell, TuiHeader, TuiSearch } from '@taiga-ui/layout';
-import { TuiInputDateModule, TuiInputModule, TuiInputTimeModule, TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
+import { TuiInputDateModule, TuiInputDateTimeModule, TuiInputModule, TuiInputTimeModule, TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { ListSelectionComponent } from '../../../../app/shared/components/list-selection/list-selection.component';
 import { LessonService } from '../../services/lesson.service';
 import { FacadeService } from '../../../../app/shared/services/facade.service';
@@ -19,6 +19,9 @@ import { LessonMapper } from '../../../../app/shared/models/mapper/lesson.mapper
 import { ScheduleBatchRequest } from '../../../../app/shared/models/requests/schedule-batch.request';
 import { ScheduledLessonDto } from '../../../../app/shared/models/dto/scheduled-lesson.dto';
 import { LessonAttendanceComponent } from '../lesson-attendance/lesson-attendance.component';
+import { UserEntity } from '../../../../app/shared/models/entity/user.entity';
+import { UserMapper } from '../../../../app/shared/models/mapper/user.mapper';
+import { UserRole } from '../../../../app/shared/models/enum/user-role.enum';
 
 type ScheduledLesson = {
   day: number,
@@ -43,6 +46,7 @@ type LessonByDay = {
     TuiTextfield,
     TuiSelectModule,
     TuiTextfieldControllerModule,
+    TuiInputDateTimeModule,
     TuiTitle,
     TuiConnected,
     TuiInputModule,
@@ -61,10 +65,12 @@ type LessonByDay = {
   styleUrl: './schedule.component.less',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ScheduleComponent {
+export class ScheduleComponent implements OnInit {
   
   private readonly dialogs = inject(TuiDialogService);
   private readonly alerts = inject(TuiAlertService);
+
+  protected currentUser: UserEntity | null = null;
 
   protected lessons: Array<LessonEntity> = new Array;
   protected lessonsByDays: Array<LessonByDay> = new Array;
@@ -83,8 +89,30 @@ export class ScheduleComponent {
     private cdr: ChangeDetectorRef,
   ) {}
 
+  ngOnInit(): void {
+    this.facadeService.me().subscribe({
+      next: (response) => this.currentUser = UserMapper.mapToEntity(response.data),
+      error: (response) => this.showAlert("Ошибка", response.error.message, "negative", 5000),
+      complete: () => this.cdr.detectChanges()
+    });
+  }
+
+  protected isStudent(): boolean {
+    return this.currentUser?.role === UserRole.STUDENT;
+  }
+
+  protected isTrainer(): boolean {
+    return this.currentUser?.role === UserRole.TRAINER;
+  }
+
+  protected isAdmin(): boolean {
+    return this.currentUser?.role === UserRole.ADMIN;
+  }
+
   protected readonly searchForm = new FormGroup({
     search: new FormControl(),
+    startDate: new FormControl([TuiDay.currentLocal().append({ day: -10 }), new TuiTime(0, 0, 0)], { nonNullable: true }),
+    endDate: new FormControl([TuiDay.currentLocal().append({ day: 10 }), new TuiTime(0, 0, 0)], { nonNullable: true }),
   });
 
   protected readonly createLessonGroup = new FormGroup({
@@ -120,7 +148,14 @@ export class ScheduleComponent {
   }
   
   protected showSelectionDialog(): void {
-    const observe = this.facadeService.getGroups();
+    let observe;
+
+    if (this.currentUser?.role === UserRole.ADMIN) {
+      observe = this.facadeService.getGroups();
+    } else {
+      observe = this.facadeService.getMyGroups();
+    }
+    
     this.dialog(observe).subscribe({
       next: (next) => {
         if (next === null) return;
@@ -165,11 +200,21 @@ export class ScheduleComponent {
   }
 
   protected getLessonsByGroup(group: GroupEntity) {
-    this.lessonService.getLessonsByGroup(group.id).subscribe({
-      next: (next) => {
+
+    const startDateValue = this.searchForm.controls.startDate.value[0] as TuiDay;
+    const startTimeValue = this.searchForm.controls.startDate.value[1] as TuiTime;
+    const endDateValue = this.searchForm.controls.endDate.value[0] as TuiDay;
+    const endTimeValue = this.searchForm.controls.endDate.value[1] as TuiTime;
+    
+    const startDateTime: Date = new Date(startDateValue.year, startDateValue.month, startDateValue.day, startTimeValue.hours, startTimeValue.minutes, startTimeValue.seconds);
+    const endDateTime: Date = new Date(endDateValue.year, endDateValue.month, endDateValue.day, endTimeValue.hours, endTimeValue.minutes, endTimeValue.seconds);
+
+    this.facadeService.getLessonsByGroup(group.id, startDateTime.toISOString(), endDateTime.toISOString()).subscribe({
+      next: (response) => {
         this.lessons = new Array;
         this.lessonsByDays = new Array;
-        next.data.map((item) => this.lessons.push(LessonMapper.mapToEntity(item)));
+        
+        response.data.map((item) => this.lessons.push(LessonMapper.mapToEntity(item)));
         this.lessons.forEach((lesson) => {
           const day = new Date(lesson.endTime.getFullYear(), lesson.endTime.getMonth(), lesson.endTime.getDate());
           const dayLessons = this.lessonsByDays.find((item) => item.day.toDateString() === day.toDateString());
@@ -179,6 +224,7 @@ export class ScheduleComponent {
             this.lessonsByDays.push({ day: day, lessons: new Array(lesson) });
           }
         });
+
         this.lessonsByDays = this.lessonsByDays.sort((a, b) => a.day.getMilliseconds() - b.day.getMilliseconds());
         this.cdr.detectChanges();
       },
@@ -233,8 +279,8 @@ export class ScheduleComponent {
     this.scheduledLessons.forEach((item: ScheduledLesson) => {
       const lessonDto: ScheduledLessonDto = {
         day: item.day + 1,
-        startTime: `${item.startTime.getHours()}:00:00`,
-        endTime: `${item.endTime.getHours()}:00:00`
+        startTime: new TuiTime(item.startTime.getHours(), item.startTime.getMinutes(), item.startTime.getSeconds()).shift({ hours: -5 }).toString("HH:MM:SS"),
+        endTime: new TuiTime(item.endTime.getHours(), item.endTime.getMinutes(), item.endTime.getSeconds()).shift({ hours: -5 }).toString("HH:MM:SS")
       };
       scheduledLessonsDtos.push(lessonDto);
     });

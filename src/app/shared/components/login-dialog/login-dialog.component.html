@@ -4,7 +4,7 @@
     (reset)="reset()">
     <div class="tui-row tui-row_sme">
       <div class="tui-col_12">
-        <div class="tui-form__row">
+        <!-- <div class="tui-form__row">
           <tui-tabs [(activeItemIndex)]="activeTabIndex">
             <button
               iconStart="@tui.log-in"
@@ -19,6 +19,9 @@
               Регистрация
             </button>
           </tui-tabs>
+        </div> -->
+        <div class="tui-form__header tui-form__header_margin-top_none">
+          <h3 class="tui-form__header_margin-top_none">Авторизация</h3>
         </div>
         @if (activeTabIndex === 0) {
         <div class="tui-form__row">

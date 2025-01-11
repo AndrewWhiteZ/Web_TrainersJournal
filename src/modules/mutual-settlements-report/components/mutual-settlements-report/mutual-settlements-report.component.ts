@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TuiAlertService, TuiAppearance, TuiAutoColorPipe, TuiButton, tuiDialog, TuiExpand, TuiInitialsPipe, TuiLabel, TuiSelect, TuiTextfield, TuiTitle } from '@taiga-ui/core';
-import { TuiAvatar, TuiBadge, TuiChevron, TuiChip, TuiConnected, TuiDataListWrapper, TuiPagination, TuiSegmented, TuiSkeleton, TuiStatus } from '@taiga-ui/kit';
+import { TuiAlertService, TuiAppearance, TuiAutoColorPipe, TuiButton, tuiDialog, TuiExpand, TuiInitialsPipe, TuiScrollbar, TuiTextfield, TuiTitle } from '@taiga-ui/core';
+import { TuiAvatar, TuiBadge, TuiChip, TuiConnected, TuiDataListWrapper, TuiPagination, TuiSegmented, TuiSkeleton, TuiStatus, TuiTabs } from '@taiga-ui/kit';
 import { TuiCardLarge, TuiCell, TuiHeader, TuiSearch } from '@taiga-ui/layout';
 import { Subscription } from 'rxjs';
 import { FacadeService } from '../../../../app/shared/services/facade.service';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { TuiTextfieldControllerModule } from '@taiga-ui/legacy';
+import { WaIntersectionObserver } from '@ng-web-apis/intersection-observer';
+import { TuiInputDateTimeModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
+import { TuiTable } from '@taiga-ui/addon-table';
 import { ListSelectionComponent } from '../../../../app/shared/components/list-selection/list-selection.component';
 import { GroupDto } from '../../../../app/shared/models/dto/group.dto';
 import { StudentDto } from '../../../../app/shared/models/dto/student.dto';
@@ -20,12 +22,28 @@ import { TuiCurrencyPipe } from '@taiga-ui/addon-commerce';
 import { DatePipe } from '@angular/common';
 import { BeltLevelColorPipe } from '../../../../app/shared/pipes/belt-level-color.pipe';
 import { BeltLevelPipe } from '../../../../app/shared/pipes/belt-level.pipe';
+import { TuiDay, TuiLet, TuiTime } from '@taiga-ui/cdk';
+import { TransactionType } from '../../../../app/shared/models/enum/transaction-type.enum';
+import { UserEntity } from '../../../../app/shared/models/entity/user.entity';
+import { UserMapper } from '../../../../app/shared/models/mapper/user.mapper';
+import { UserRole } from '../../../../app/shared/models/enum/user-role.enum';
+
+export type Transaction = {
+  id: string,
+  type: TransactionType,
+  datetime: Date,
+  startBalance: number,
+  income: number,
+  outcome: number,
+  endBalance: number,
+}
 
 export type StudentTransactions = {
   student: StudentEntity,
-  transactions: Array<TransactionEntity>,
+  transactions: Array<Transaction>,
   expanded: boolean,
-  balance: number,
+  startBalance: number,
+  endBalance: number,
 }
 
 @Component({
@@ -53,11 +71,16 @@ export type StudentTransactions = {
     TuiBadge,
     TuiStatus,
     TuiChip,
+    TuiLet,
     TuiExpand,
+    TuiInputDateTimeModule,
     TuiInitialsPipe,
     TuiAutoColorPipe,
+    TuiScrollbar,
+    TuiTable,
     BeltLevelColorPipe,
     BeltLevelPipe,
+    WaIntersectionObserver,
   ],
   templateUrl: './mutual-settlements-report.component.html',
   styleUrl: './mutual-settlements-report.component.less',
@@ -67,10 +90,14 @@ export class MutualSettlementsReportComponent implements OnInit, OnDestroy {
 
   private readonly alerts = inject(TuiAlertService);
 
+  protected currentUser: UserEntity | null = null;
+
   private routeSub: Subscription = new Subscription;
 
   protected length = 1;
   protected index = 1;
+
+  protected activeTab = 0;
 
   protected skeletonTransactions: boolean = true;
 
@@ -79,14 +106,18 @@ export class MutualSettlementsReportComponent implements OnInit, OnDestroy {
   protected student: StudentEntity | null = null;
 
   protected studentTransactions: Array<StudentTransactions> = new Array;
-  protected transactions: Array<TransactionEntity> = new Array;
+  protected studentTransaction: StudentTransactions | null = null;
 
   protected readonly searchForm = new FormGroup({
     search: new FormControl(),
     select: new FormControl('Группа'),
+    startDate: new FormControl([TuiDay.currentLocal().append({ month: -1 }), new TuiTime(0, 0, 0)], { nonNullable: true }),
+    endDate: new FormControl([TuiDay.currentLocal(), new TuiTime(0, 0, 0)], { nonNullable: true }),
   });
 
   protected readonly items = ['Группа', 'Учащийся'];
+  protected readonly groupTableColumns = ['date', 'type', 'startSum', 'income', 'outcome', 'endSum'] as const;
+  protected readonly columns = ['date', 'type', 'startSum', 'income', 'outcome', 'endSum'] as const;
 
   private selectGroupDialog = tuiDialog(ListSelectionComponent<GroupDto>, {
     dismissible: true,
@@ -107,6 +138,21 @@ export class MutualSettlementsReportComponent implements OnInit, OnDestroy {
   ) {}
   
   ngOnInit(): void {
+    this.facadeService.me().subscribe({
+      next: (response) => {
+        this.currentUser = UserMapper.mapToEntity(response.data);
+        if (this.isStudent()) {
+          this.student = StudentMapper.mapToEntity(response.data as StudentDto);
+          this.searchForm.controls.select.setValue('Учащийся');
+          this.searchForm.controls.search.setValue(this.currentUser.fullName);
+          this.getStudentTransactions(this.student.id);
+          this.getStudentBalance(this.student.id);
+        }
+      },
+      error: (response) => this.showAlert("Ошибка", response.error.message, "negative", 5000),
+      complete: () => this.cdr.detectChanges()
+    });
+
     this.routeSub = this.route.queryParams.subscribe(params => {
       const groupId = params['groupId'];
       const studentId = params['studentId'];
@@ -126,63 +172,148 @@ export class MutualSettlementsReportComponent implements OnInit, OnDestroy {
     this.routeSub.unsubscribe();
   }
 
-  protected clearSearch() {
+  protected isStudent(): boolean {
+    return this.currentUser?.role === UserRole.STUDENT;
+  }
+
+  protected isTrainer(): boolean {
+    return this.currentUser?.role === UserRole.TRAINER;
+  }
+
+  protected isAdmin(): boolean {
+    return this.currentUser?.role === UserRole.ADMIN;
+  }
+
+  protected clearSearch(): void {
     this.searchForm.controls.search.reset();
   }
 
-  protected getStudent(studentId: string) {
+  protected getStudent(studentId: string): void {
     this.facadeService.getStudentById(studentId).subscribe({
       next: (response) => {
         this.searchForm.controls.search.setValue(response.data.fullName);
-        console.log(response.data.fullName);
       },
       error: (response) => this.showAlert("Ошибка", response.error.message, "negative", 5000),
       complete: () => this.cdr.detectChanges()
     });
   }
 
-  protected getStudentTransactions(studentId: string) {
+  protected getStudentTransactions(studentId?: string): void {
+    if (!studentId) return;
+    
     this.skeletonTransactions = true;
-    this.facadeService.getStudentTransactions(studentId).subscribe({
+
+    const startDateValue = this.searchForm.controls.startDate.value[0] as TuiDay;
+    const startTimeValue = this.searchForm.controls.startDate.value[1] as TuiTime;
+    const endDateValue = this.searchForm.controls.endDate.value[0] as TuiDay;
+    const endTimeValue = this.searchForm.controls.endDate.value[1] as TuiTime;
+    
+    const startDateTime: Date = new Date(startDateValue.year, startDateValue.month, startDateValue.day, startTimeValue.hours, startTimeValue.minutes, startTimeValue.seconds);
+    const endDateTime: Date = new Date(endDateValue.year, endDateValue.month, endDateValue.day, endTimeValue.hours, endTimeValue.minutes, endTimeValue.seconds);
+
+    this.facadeService.getStudentTransactions(studentId, startDateTime.toISOString(), endDateTime.toISOString()).subscribe({
       next: (response) => {
+
         this.skeletonTransactions = false;
-        this.transactions = new Array;
+        
+        this.studentTransaction = null;
         this.studentTransactions = new Array;
-        response.data.map((dto) => this.transactions.push(TransactionMapper.mapToEntity(dto)));
-        this.transactions.sort((a, b) => a.dt.getMilliseconds() - b.dt.getMilliseconds());
+
+        this.student = StudentMapper.mapToEntity(response.data.student);
+
+        const transactions: Array<TransactionEntity> = new Array;
+        response.data.transactions.map((dto) => transactions.push(TransactionMapper.mapToEntity(dto)));
+        transactions.sort((a, b) => a.dt.getTime() - b.dt.getTime());
+
+        let currentBalance: number = response.data.startBalance;
+
+        const transacts: Array<Transaction> = new Array;
+        transactions.forEach(item => {
+          const transact: Transaction = {
+            id: item.id,
+            datetime: item.dt,
+            type: item.type,
+            startBalance: currentBalance,
+            endBalance: currentBalance + item.sum,
+            income: item.type === TransactionType.DEPOSIT ? item.sum : 0,
+            outcome: item.type === TransactionType.LESSON_PAYMENT ? -item.sum : 0,
+          };
+          currentBalance = currentBalance + item.sum;
+          transacts.push(transact);
+        });
+        
+        this.studentTransaction = {
+          student: StudentMapper.mapToEntity(response.data.student),
+          transactions: transacts,
+          expanded: false,
+          startBalance: response.data.startBalance,
+          endBalance: response.data.endBalance,
+        };
       },
       error: (response) => this.showAlert("Ошибка", response.error.message, "negative", 5000),
       complete: () => this.cdr.detectChanges()
     });
   }
 
-  protected getGroupTransactions(groupId: string) {
+  protected getGroupTransactions(groupId?: string): void {
+    if (!groupId) return;
     this.skeletonTransactions = true;
-    this.facadeService.getGroupTransactions(groupId).subscribe({
+
+    const startDateValue = this.searchForm.controls.startDate.value[0] as TuiDay;
+    const startTimeValue = this.searchForm.controls.startDate.value[1] as TuiTime;
+    const endDateValue = this.searchForm.controls.endDate.value[0] as TuiDay;
+    const endTimeValue = this.searchForm.controls.endDate.value[1] as TuiTime;
+    
+    const startDateTime: Date = new Date(startDateValue.year, startDateValue.month, startDateValue.day, startTimeValue.hours, startTimeValue.minutes, startTimeValue.seconds);
+    const endDateTime: Date = new Date(endDateValue.year, endDateValue.month, endDateValue.day, endTimeValue.hours, endTimeValue.minutes, endTimeValue.seconds); 
+
+    this.facadeService.getGroupTransactions(groupId, startDateTime.toISOString(), endDateTime.toISOString()).subscribe({
       next: (response) => {
         this.skeletonTransactions = false;
-        this.transactions = new Array;
+
+        this.studentTransaction = null;
         this.studentTransactions = new Array;
+
         response.data.forEach(studentTransactionDto => {
           const transactions: Array<TransactionEntity> = new Array;
           studentTransactionDto.transactions.map((dto) => transactions.push(TransactionMapper.mapToEntity(dto)));
-          transactions.sort((a, b) => a.dt.getMilliseconds() - b.dt.getMilliseconds());
+          transactions.sort((a, b) => a.dt.getTime() - b.dt.getTime());
+
+          let currentBalance: number = studentTransactionDto.startBalance;
+
+          const transacts: Array<Transaction> = new Array;
+          transactions.forEach(item => {
+            const transact: Transaction = {
+              id: item.id,
+              datetime: item.dt,
+              type: item.type,
+              startBalance: currentBalance,
+              endBalance: currentBalance + item.sum,
+              income: item.type === TransactionType.DEPOSIT ? item.sum : 0,
+              outcome: item.type === TransactionType.LESSON_PAYMENT ? -item.sum : 0,
+            };
+            currentBalance = currentBalance + item.sum;
+            transacts.push(transact);
+          });
+
+          console.log(transacts);
+
           const studentTransaction: StudentTransactions = {
             student: StudentMapper.mapToEntity(studentTransactionDto.student),
-            transactions: transactions,
+            transactions: transacts,
             expanded: false,
-            balance: studentTransactionDto.balance,
+            startBalance: studentTransactionDto.startBalance,
+            endBalance: studentTransactionDto.endBalance,
           };
           this.studentTransactions.push(studentTransaction);
         });
-        this.transactions.sort((a, b) => a.dt.getMilliseconds() - b.dt.getMilliseconds());
       },
       error: (response) => this.showAlert("Ошибка", response.error.message, "negative", 5000),
       complete: () => this.cdr.detectChanges()
     });
   }
 
-  protected getStudentBalance(userId: string) {
+  protected getStudentBalance(userId: string): void {
     this.skeletonTransactions = true;
     this.facadeService.getStudentBalance(userId).subscribe({
       next: (response) => {
@@ -214,17 +345,20 @@ export class MutualSettlementsReportComponent implements OnInit, OnDestroy {
   }
 
   protected showSelectionDialog(): void {
+    if (this.isStudent()) return;
+    let observe;
     const type = this.searchForm.controls.select.value;
     if (type === 'Группа') {
-      const observe = this.facadeService.getGroups();
+      if (this.currentUser?.role === UserRole.ADMIN) {
+        observe = this.facadeService.getGroups(); 
+      } else {
+        observe = this.facadeService.getMyGroups();
+      }
       this.selectGroupDialog(observe).subscribe({
         next: (response) => {
           if (response === null) return;
           this.group = GroupMapper.mapToEntity(response);
           this.searchForm.controls.search.setValue(this.group.name);
-          if (this.group) {
-            this.getGroupTransactions(this.group.id); 
-          }
         },
         error: (response) => this.showAlert("Ошибка", response.error.message, "negative", 5000),
         complete: () => this.cdr.detectChanges()

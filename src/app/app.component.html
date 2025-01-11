@@ -1,4 +1,5 @@
 <tui-root>
+  
   <header tuiNavigationHeader>
     <button
       type="button"
@@ -8,37 +9,48 @@
       [(open)]="open"
     >
       <aside [tuiNavigationAside]="true">
-        <a iconStart="@tui.group" tuiAsideItem [routerLink]="'/groups'">
-          Группы
-        </a>
-        <a iconStart="@tui.users" tuiAsideItem [routerLink]="'/users'">
-          Пользователи
-        </a>
-        <a
-          iconStart="@tui.calendar-days"
-          tuiAsideItem
-          [routerLink]="'/schedule'"
-        >
-          Расписание
-        </a>
-        <tui-aside-group>
-          <button
-            iconStart="@tui.file-chart-line"
+        @if (currentUser) {
+          @if (isTrainer() || isAdmin()) {
+            <a iconStart="@tui.group" tuiAsideItem [routerLink]="'/groups'">
+              Группы
+            </a>
+            <a iconStart="@tui.users" tuiAsideItem [routerLink]="'/users'">
+              Пользователи
+            </a>
+          }
+          <a
+            iconStart="@tui.calendar-days"
             tuiAsideItem
-            tuiChevron
-            type="button"
+            [routerLink]="'/schedule'"
           >
-            Отчеты
-            <ng-template>
-              <a iconStart="@tui.calendar-check" tuiAsideItem [routerLink]="'/attendance-report'">
-                Посещаемость
-              </a>
-              <a iconStart="@tui.chart-candlestick" tuiAsideItem [routerLink]="'/reports/mutual-settlements'">
-                Взаиморасчеты
-              </a>
-            </ng-template>
-          </button>
-        </tui-aside-group>
+            Расписание
+          </a>
+          <a
+            iconStart="@tui.receipt-russian-ruble"
+            tuiAsideItem
+            [routerLink]="'/bills'"
+          >
+            Чеки
+          </a>
+          <tui-aside-group>
+            <button
+              iconStart="@tui.file-chart-line"
+              tuiAsideItem
+              tuiChevron
+              type="button"
+            >
+              Отчеты
+              <ng-template>
+                <a iconStart="@tui.calendar-check" tuiAsideItem [routerLink]="'/reports/attendance'">
+                  Посещаемость
+                </a>
+                <a iconStart="@tui.chart-candlestick" tuiAsideItem [routerLink]="'/reports/mutual-settlements'">
+                  Взаиморасчеты
+                </a>
+              </ng-template>
+            </button>
+          </tui-aside-group>
+        }
       </aside>
     </button>
     <span tuiNavigationLogo>
@@ -72,6 +84,17 @@
               {{ currentUser.fullName }}
             </button>
           </tui-opt-group>
+          @if (isAdmin()) {
+            <tui-opt-group>
+              <button
+                tuiOption
+                type="button"
+                iconStart="@tui.user-plus"
+                (click)="showRegisterDialog()">
+                Создать пользователя
+              </button>
+            </tui-opt-group>
+          }
           <tui-opt-group>
             <button
               tuiOption
@@ -95,40 +118,75 @@
   </header>
   <div [style.display]="'flex'">
     <aside [tuiNavigationAside]="false">
-      <a iconStart="@tui.group" tuiAsideItem [routerLink]="'/groups'">
-        Группы
-      </a>
-      <a iconStart="@tui.users" tuiAsideItem [routerLink]="'/users'">
-        Пользователи
-      </a>
-      <a
-        iconStart="@tui.calendar-days"
-        tuiAsideItem
-        [routerLink]="'/schedule'"
-      >
-        Расписание
-      </a>
-      <tui-aside-group>
-        <button
-          iconStart="@tui.file-chart-line"
+      @if (currentUser) {
+        @if (isTrainer() || isAdmin()) {
+          <a iconStart="@tui.group" tuiAsideItem [routerLink]="'/groups'">
+            Группы
+          </a>
+          <a iconStart="@tui.users" tuiAsideItem [routerLink]="'/users'">
+            Пользователи
+          </a>
+        }
+        <a
+          iconStart="@tui.calendar-days"
           tuiAsideItem
-          tuiChevron
-          type="button"
+          [routerLink]="'/schedule'"
         >
-          Отчеты
-          <ng-template>
-            <a iconStart="@tui.calendar-check" tuiAsideItem [routerLink]="'/attendance-report'">
-              Посещаемость
-            </a>
-            <a iconStart="@tui.chart-candlestick" tuiAsideItem [routerLink]="'/reports/mutual-settlements'">
-              Взаиморасчеты
-            </a>
-          </ng-template>
-        </button>
-      </tui-aside-group>
+          Расписание
+        </a>
+        <a
+          iconStart="@tui.receipt-russian-ruble"
+          tuiAsideItem
+          [routerLink]="'/bills'"
+        >
+          Чеки
+        </a>
+        <tui-aside-group>
+          <button
+            iconStart="@tui.file-chart-line"
+            tuiAsideItem
+            tuiChevron
+            type="button"
+          >
+            Отчеты
+            <ng-template>
+              <a iconStart="@tui.calendar-check" tuiAsideItem [routerLink]="'/reports/attendance'">
+                Посещаемость
+              </a>
+              <a iconStart="@tui.chart-candlestick" tuiAsideItem [routerLink]="'/reports/mutual-settlements'">
+                Взаиморасчеты
+              </a>
+            </ng-template>
+          </button>
+        </tui-aside-group>
+      }
     </aside>
-    <main tuiNavigationMain class="tui-space_top-5" style="display: flex; flex-direction: column;">
-      <router-outlet></router-outlet>
+    <main tuiNavigationMain class="tui-space_top-5">
+      @if (currentUser) {
+        <router-outlet></router-outlet>
+      } @else {
+        <div tuiCardLarge tuiAppearance="floating">
+          <tui-block-status size="l">
+            <div tuiHeader="xxl">
+              <h1 tuiTitle style="text-align: center;">
+                Журнал тренера
+              </h1>
+            </div>
+            <div tuiHeader="l">
+              <h3 tuiTitle>Чтобы продолжить, пройдите авторизацию</h3>
+            </div>
+            <button
+              appearance="primary"
+              size="xl"
+              tuiButton
+              type="button"
+              (click)="showLoginDialog()"
+            >
+              Авторизация
+            </button>
+          </tui-block-status>
+        </div>
+      }
     </main>
   </div>
 </tui-root>

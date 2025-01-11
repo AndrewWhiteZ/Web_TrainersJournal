@@ -32,6 +32,9 @@ import { AsyncPipe } from '@angular/common';
 import { TuiInputModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { CreateGroupRequest } from '../../../../app/shared/models/requests/create-group.request';
 import { FacadeService } from '../../../../app/shared/services/facade.service';
+import { UserEntity } from '../../../../app/shared/models/entity/user.entity';
+import { UserMapper } from '../../../../app/shared/models/mapper/user.mapper';
+import { UserRole } from '../../../../app/shared/models/enum/user-role.enum';
 
 @Component({
   selector: 'app-group-list',
@@ -63,6 +66,8 @@ export class GroupListComponent implements OnInit {
   
   protected skeletonGroups: boolean = true;
 
+  protected currentUser: UserEntity | null = null;
+
   protected length = 1;
   protected index = 1;
 
@@ -86,12 +91,36 @@ export class GroupListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.getGroups();
+    this.facadeService.me().subscribe({
+      next: (response) => {
+        this.currentUser = UserMapper.mapToEntity(response.data);
+        if (this.currentUser.role === UserRole.ADMIN) {
+          this.getGroups();
+        } else {
+          this.getMyGroups();
+        }
+      },
+      error: (response) => this.showAlert("Ошибка", response.error.message, "negative", 5000),
+      complete: () => this.cdr.detectChanges()
+    });
   }
 
   protected getGroups() {
     this.skeletonGroups = true;
     this.facadeService.getGroups().subscribe({
+      next: (next) => {
+        this.groups = new Array;
+        next.data.map((dto) => this.groups.push(GroupMapper.mapToEntity(dto)));
+        this.skeletonGroups = false;
+      },
+      error: (response) => this.showAlert("Ошибка", response.error.message, "negative", 5000),
+      complete: () => this.cdr.detectChanges()
+    });
+  }
+
+  protected getMyGroups() {
+    this.skeletonGroups = true;
+    this.facadeService.getMyGroups().subscribe({
       next: (next) => {
         this.groups = new Array;
         next.data.map((dto) => this.groups.push(GroupMapper.mapToEntity(dto)));
@@ -114,7 +143,7 @@ export class GroupListComponent implements OnInit {
   }
 
   protected showDialog(content: PolymorpheusContent<TuiDialogContext>): void {
-    this.dialogs.open(content, { label: 'Новая группа' }).subscribe();
+    this.dialogs.open(content, { label: 'Новая группа' }).subscribe({ complete: () => this.cdr.detectChanges() });
   }
 
   protected createGroup(observer: any) {
@@ -126,12 +155,9 @@ export class GroupListComponent implements OnInit {
       next: () => {
         this.showAlert("Успех", `Группа <b>${request.name}</b> успешно создана`, "positive", 3000);
         observer.complete();
-        this.cdr.detectChanges();
       },
-      error: (response) => { 
-        this.showAlert("Ошибка", response.error.message, "negative", 5000);
-        this.cdr.detectChanges();
-      }
+      error: (response) => this.showAlert("Ошибка", response.error.message, "negative", 5000),
+      complete: () => this.cdr.detectChanges()
     });
   }
 

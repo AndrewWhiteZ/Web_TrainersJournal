@@ -5,12 +5,10 @@ import { TuiButton, TuiLabel, TuiTextfield, TuiIcon, TuiError, TuiDialogContext,
 import { TuiPassword, TuiFieldErrorPipe, TuiTabs, TuiDataListWrapper, TuiRadio, TuiStepper, TuiRadioList } from '@taiga-ui/kit';
 import { SignInRequest } from '../../models/requests/sign-in.request';
 import { injectContext } from '@taiga-ui/polymorpheus';
-import { SignUpRequest } from '../../models/requests/sign-up.request';
 import { TuiInputDateModule, TuiInputModule, TuiInputNumberModule, tuiInputNumberOptionsProvider, TuiInputPhoneModule, TuiSelectModule, TuiTextfieldControllerModule } from '@taiga-ui/legacy';
 import { UserService } from '../../../../modules/users/services/user.service';
 import { UserRole } from '../../models/enum/user-role.enum';
 import { TuiDay } from '@taiga-ui/cdk';
-import { StudentSignUpRequest } from '../../models/requests/student-sign-up.request';
 
 export interface UserRoleSpec {
   apiName: string;
@@ -58,7 +56,7 @@ export function getUserRoleSpec(userRole: UserRole): UserRoleSpec {
       precision: 0,
     }),
     tuiInputNumberOptionsProvider({
-        step: 1,
+      step: 1,
     }),
   ]
 })

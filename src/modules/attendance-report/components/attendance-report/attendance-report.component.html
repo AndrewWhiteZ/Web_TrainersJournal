@@ -1,0 +1,105 @@
+<div tuiAppearance="floating" tuiCardLarge tuiConnected>
+  <div tuiHeader="l">
+    <h1 tuiTitle="l">Отчет по посещаемости</h1>
+  </div>
+  <search tuiSearch>
+    <form [formGroup]="searchForm">
+      <fieldset>
+        <tui-input-date-time formControlName="startDate" tuiTextfieldSize="m">
+          Дата и время начала
+        </tui-input-date-time>
+        <tui-input-date-time formControlName="endDate" tuiTextfieldSize="m">
+          Дата и время окончания
+        </tui-input-date-time>
+      </fieldset>
+      <fieldset tuiTextfieldSize="m">
+        <tui-textfield iconStart="@tui.search" (click)="showSelectionDialog()">
+          <input formControlName="search" placeholder="Поиск" tuiTextfield />
+        </tui-textfield>
+        <button
+          size="m"
+          tuiButton
+          iconStart="@tui.play"
+          appearance="positive"
+          type="button"
+          (click)="getGroupAttendance(group?.id)"
+        >
+          Сформировать
+        </button>
+      </fieldset>
+    </form>
+  </search>
+  <hr/>
+  <tui-scrollbar
+    waIntersectionRoot
+    class="box"
+    [hidden]="true"
+  >
+    <table
+      size="l"
+      tuiTable
+      class="table"
+      [columns]="groupTableColumns"
+      [direction]="-1">
+      <thead tuiThead>
+        <tr tuiThGroup>
+          <th
+            *tuiHead="'student'"
+            tuiTh
+            [sorter]="null"
+            [sticky]="true"
+            [resizable]="true"
+          >
+            Учащийся
+          </th>
+          @for (item of lessonList; track $index) {
+            <th
+              *tuiHead="item.id"
+              tuiTh
+              [sorter]="null"
+              [resizable]="true"
+            >
+              {{ item.startTime | date : 'short' }}
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody
+        *tuiLet="groupAttendance as groupAttendanceList"
+        tuiTbody
+        [data]="groupAttendanceList"
+      >
+        @for (studentAttendance of list; track $index) {
+          <tr tuiTr>
+            <th tuiTd *tuiCell="'student'">
+              <div tuiCell="l">
+                <tui-avatar
+                  [src]="studentAttendance.student.fullName | tuiInitials"
+                  [style.background]="studentAttendance.student.fullName | tuiAutoColor"
+                />
+                <span tuiTitle>
+                  {{ studentAttendance.student.fullName }}
+                  <span tuiSubtitle>Учащийся</span>
+                </span>
+              </div>
+            </th>
+            @for (lessonAttendance of studentAttendance.lessons; track $index) {
+              <td tuiTd *tuiCell="lessonAttendance.lesson.id">
+                <div tuiCell="l">
+                  <input
+                    tuiCheckbox
+                    type="checkbox"
+                    [size]="'m'"
+                    [disabled]="isStudent()"
+                    [(ngModel)]="lessonAttendance.attended"
+                    (ngModelChange)="changeAttendance(lessonAttendance.lesson.id, studentAttendance.student.studentId, lessonAttendance)"
+                  />
+                </div>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </tui-scrollbar>
+</div>

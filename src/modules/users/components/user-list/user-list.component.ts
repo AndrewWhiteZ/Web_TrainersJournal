@@ -122,8 +122,6 @@ export class UserListComponent implements OnInit {
       parentPhone: controls.parentPhone.value
     };
 
-    console.log(request);
-
     this.facadeService.register(request).subscribe({
       next: (response) => {
         this.showAlert("Успех", `Пользователь <b>${response.data.fullName}</b> зарегистрирован`, "positive", 3000);

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ApiResponse } from '../../../app/shared/models/response/api.response';
 import { LessonDto } from '../../../app/shared/models/dto/lesson.dto';
@@ -12,8 +12,11 @@ export class LessonService {
 
   constructor(private http: HttpClient) {}
 
-  public getLessonsByGroup(groupId: string) {
-    return this.http.get<ApiResponse<Array<LessonDto>>>(`/api/v1/groups/${groupId}/schedule`);
+  public getLessonsByGroup(groupId: string, startTime?: string, endTime?: string) {
+    let params = new HttpParams();
+    if (startTime) params = params.append('startTime', startTime);
+    if (endTime) params = params.append('endTime', endTime);
+    return this.http.get<ApiResponse<Array<LessonDto>>>(`/api/v1/groups/${groupId}/schedule`, { params });
   }
 
   public createGroupLesson(groupId: string, body: ScheduleLessonRequest) {

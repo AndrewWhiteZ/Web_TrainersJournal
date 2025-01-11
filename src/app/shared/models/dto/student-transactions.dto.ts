@@ -4,5 +4,6 @@ import { TransactionDto } from "./transaction.dto";
 export interface StudentTransactionsDto {
   student: StudentDto,
   transactions: Array<TransactionDto>,
-  balance: number,
+  startBalance: number,
+  endBalance: number,
 }

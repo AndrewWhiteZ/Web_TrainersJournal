@@ -9,10 +9,11 @@ import { EmptyResponse } from '../../models/response/empty.response';
 
 @Component({
     selector: 'app-list-selection',
+    standalone: true,
     imports: [
-        TuiAccordion,
-        TuiButton,
-        ReactiveFormsModule,
+      TuiAccordion,
+      TuiButton,
+      ReactiveFormsModule,
     ],
     templateUrl: './list-selection.component.html',
     styleUrl: './list-selection.component.less'

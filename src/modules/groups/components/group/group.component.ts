@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { TuiAlertService, TuiAppearance, TuiAutoColorPipe, TuiButton, tuiDialog, TuiDialogContext, TuiDialogService, TuiInitialsPipe, TuiTextfield } from '@taiga-ui/core';
-import { TUI_CONFIRM, TuiAvatar, TuiBadgedContent, TuiCheckbox, TuiChip, TuiConfirmData, TuiSkeleton, TuiTab, TuiTabs } from '@taiga-ui/kit';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TuiAlertService, TuiAppearance, TuiAutoColorPipe, TuiButton, tuiDialog, TuiDialogContext, TuiDialogService, TuiIcon, TuiInitialsPipe, TuiLabel, TuiTextfield } from '@taiga-ui/core';
+import { TUI_CONFIRM, TuiAvatar, TuiBadgedContent, TuiChip, TuiConfirmData, TuiSkeleton, TuiTab, TuiTabs } from '@taiga-ui/kit';
 import { TuiBlockStatus, TuiCardLarge, TuiCell, TuiHeader, TuiSearch } from '@taiga-ui/layout';
 import { Subscription } from 'rxjs';
 import { GroupEntity } from '../../../../app/shared/models/entity/group.entity';
@@ -25,6 +25,7 @@ import { BeltLevelPipe } from '../../../../app/shared/pipes/belt-level.pipe';
 
 @Component({
   selector: 'app-group',
+  standalone: true,
   imports: [
     TuiAvatar,
     TuiHeader,
@@ -107,6 +108,7 @@ export class GroupComponent implements OnInit, OnDestroy {
   constructor(
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
+    private router: Router,
     private facadeService: FacadeService,
   ) {}
     
@@ -126,6 +128,7 @@ export class GroupComponent implements OnInit, OnDestroy {
     this.facadeService.getGroupById(groupId).subscribe({
       next: (response) => {
         this.group = GroupMapper.mapToEntity(response.data);
+        console.log(this.group);
         this.skeletonGroup = false;
         this.getStudents(groupId);
         this.getLessonPricePeriods(groupId);
@@ -298,6 +301,10 @@ export class GroupComponent implements OnInit, OnDestroy {
     });
   }
 
+  protected changeRoute(route: String) {
+    this.router.navigate(['user/', route]);
+  }
+  
   private showAlert(label: string, data: string, appearance: string, autoClose: number): void {
     this.alerts.open(data, { appearance, label, autoClose }).subscribe();
   }

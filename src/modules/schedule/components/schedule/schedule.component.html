@@ -4,6 +4,14 @@
   </div>
   <search tuiSearch>
     <form [formGroup]="searchForm">
+      <fieldset>
+        <tui-input-date-time formControlName="startDate" tuiTextfieldSize="m">
+          Дата и время начала
+        </tui-input-date-time>
+        <tui-input-date-time formControlName="endDate" tuiTextfieldSize="m">
+          Дата и время окончания
+        </tui-input-date-time>
+      </fieldset>
       <fieldset tuiTextfieldSize="m">
         <tui-textfield iconStart="@tui.search">
           <input
@@ -13,24 +21,26 @@
             (click)="showSelectionDialog()"
           />
         </tui-textfield>
-        <button
-          size="m"
-          tuiButton
-          iconStart="@tui.circle-plus"
-          appearance="positive"
-          type="button"
-          (click)="showDialog(createLessonTemplate, 'Новое занятие', 'm')"
-        >
-          Создать занятие
-        </button>
-        <button
-          size="m"
-          tuiIconButton
-          iconStart="@tui.calendar-plus-2"
-          appearance="negative"
-          type="button"
-          (click)="showDialog(scheduleLessonsTemplate, 'Планирование занятий', 'l')"
-        ></button>
+        @if (!isStudent()) {
+          <button
+            size="m"
+            tuiButton
+            iconStart="@tui.circle-plus"
+            appearance="positive"
+            type="button"
+            (click)="showDialog(createLessonTemplate, 'Новое занятие', 'm')"
+          >
+            Создать занятие
+          </button>
+          <button
+            size="m"
+            tuiIconButton
+            iconStart="@tui.calendar-plus-2"
+            appearance="negative"
+            type="button"
+            (click)="showDialog(scheduleLessonsTemplate, 'Планирование занятий', 'l')"
+          ></button>
+        }
       </fieldset>
     </form>
   </search>
@@ -55,7 +65,7 @@
   } @else if (lessons.length > 0) {
     @for(lessonByDay of lessonsByDays; track $index) {
       <h3 tuiTitle="m">{{ lessonByDay.day | date: 'longDate' }}</h3>
-      @for(lesson of lessons; track $index) {
+      @for(lesson of lessonByDay.lessons; track $index) {
         <label tuiCell>
           <tui-avatar
             appearance="secondary"
@@ -66,23 +76,25 @@
             {{ lesson.startTime | date: 'shortTime' }} – {{ lesson.endTime | date: 'shortTime' }}
             <span tuiSubtitle>Занятие</span>
           </div>
-          <button
-            appearance="action-grayscale"
-            iconStart="@tui.user-round-check"
-            tuiIconButton
-            type="button"
-            size="m"
-            [style.border-radius.%]="100"
-            (click)="showAttendanceDialog(selectedGroup, lesson)"
-          ></button>
-          <button
-            appearance="action-destructive"
-            iconStart="@tui.circle-x"
-            tuiIconButton
-            type="button"
-            size="m"
-            (click)="approveLessonCancelation(lesson)"
-          ></button>
+          @if (!isStudent()) {
+            <button
+              appearance="action-grayscale"
+              iconStart="@tui.user-round-check"
+              tuiIconButton
+              type="button"
+              size="m"
+              [style.border-radius.%]="100"
+              (click)="showAttendanceDialog(selectedGroup, lesson)"
+            ></button>
+            <!-- <button
+              appearance="action-destructive"
+              iconStart="@tui.circle-x"
+              tuiIconButton
+              type="button"
+              size="m"
+              (click)="approveLessonCancelation(lesson)"
+            ></button> -->
+          }
         </label>
       }
     }

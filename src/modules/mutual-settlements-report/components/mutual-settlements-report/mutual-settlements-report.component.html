@@ -4,18 +4,59 @@
   </div>
   <search tuiSearch>
     <form [formGroup]="searchForm">
+      <fieldset>
+        @if(!isStudent()) {
+          <tui-segmented size="m" (activeItemIndexChange)="clearSearch()">
+            @for (segment of items; track $index) {
+              <label>
+                <input formControlName="select" type="radio" [value]="segment"/>
+                {{ segment }}
+              </label>
+            }
+          </tui-segmented>
+        }
+        <tui-input-date-time formControlName="startDate" tuiTextfieldSize="m">
+          Дата и время начала
+        </tui-input-date-time>
+        <tui-input-date-time formControlName="endDate" tuiTextfieldSize="m">
+          Дата и время окончания
+        </tui-input-date-time>
+      </fieldset>
       <fieldset tuiTextfieldSize="m">
         <tui-textfield iconStart="@tui.search" (click)="showSelectionDialog()">
-          <input formControlName="search" placeholder="Поиск" tuiTextfield />
+          <input formControlName="search" placeholder="Поиск" tuiTextfield/>
         </tui-textfield>
-        <tui-segmented size="m" (activeItemIndexChange)="clearSearch()">
-          @for (segment of items; track $index) {
-            <label>
-              <input formControlName="select" type="radio" [value]="segment"/>
-              {{ segment }}
-            </label>
-          }
+        <tui-segmented size="m" [(activeItemIndex)]="activeTab">
+          <label>
+            Список
+          </label>
+          <label>
+            Таблица
+          </label>
         </tui-segmented>
+        @if (searchForm.controls.select.value === 'Группа') { 
+          <button
+            size="m"
+            tuiButton
+            iconStart="@tui.play"
+            appearance="positive"
+            type="button"
+            (click)="getGroupTransactions(group?.id)"
+          >
+            Сформировать
+          </button>
+        } @else {
+          <button
+            size="m"
+            tuiButton
+            iconStart="@tui.play"
+            appearance="positive"
+            type="button"
+            (click)="getStudentTransactions(student?.id)"
+          >
+            Сформировать
+          </button>
+        }
       </fieldset>
     </form>
   </search>
@@ -28,98 +69,242 @@
         appearance="secondary"
       />
       <div tuiTitle>
-        <strong>Для просмотра информацию о взаиморасчетах выберите учащегося или группу</strong>
+        <strong>Для просмотра информации о взаиморасчетах выберите учащегося или группу и сформируйте отчет</strong>
       </div>
     </label>
   } @else {
     @if (searchForm.controls.select.value === 'Группа') {
       @if (studentTransactions.length > 0) {
-        @for (studentTransaction of studentTransactions; track $index) {
-          <label tuiCell>
-            <tui-avatar
-              size="m"
-              [src]="studentTransaction.student.fullName | tuiInitials"
-              [style.background]="studentTransaction.student.fullName | tuiAutoColor"
-              [tuiSkeleton]="skeletonTransactions"
-            />
-            <div tuiTitle [tuiSkeleton]="skeletonTransactions && 10">
-              {{ studentTransaction.student.fullName }}
-              <span tuiSubtitle>
-                <tui-chip size="xxs" [style.background]="studentTransaction.student.beltLevel | beltLevelColor">{{ studentTransaction.student.beltLevel | beltLevel }}</tui-chip>
-              </span>
-            </div>
-            <div tuiTitle [tuiSkeleton]="skeletonTransactions && 10">
-              <strong [style.color]="getBalanceAppearance(studentTransaction.balance)">{{ studentTransaction.balance > 0 ? '+' : '' }}{{ studentTransaction.balance }} {{ 'RUB' | tuiCurrency }}</strong>
-              <span tuiSubtitle>Текущий баланс</span>
-            </div>
-            <button
-              appearance="secondary"
-              [iconStart]="studentTransaction.expanded ? '@tui.chevron-up' : '@tui.chevron-down'"
-              tuiIconButton
-              type="button"
-              size="m"
-              [tuiSkeleton]="skeletonTransactions"
-              [style.border-radius.%]="100"
-              (click)="studentTransaction.expanded = !studentTransaction.expanded"
-            ></button>
-          </label>
-          @if (studentTransaction.expanded) {
-            <tui-expand [expanded]="studentTransaction.expanded">
-              <ng-template tuiExpandContent>
-                <div
-                  tuiAppearance="floating"
-                  tuiCardLarge
-                >
-                  @if (studentTransaction.transactions.length > 0) {
-                    @for (transaction of studentTransaction.transactions; track $index) {
+        @if (activeTab === 0) {
+          @for (studentTransaction of studentTransactions; track $index) {
+            <label tuiCell>
+              <tui-avatar
+                size="m"
+                [src]="studentTransaction.student.fullName | tuiInitials"
+                [style.background]="studentTransaction.student.fullName | tuiAutoColor"
+                [tuiSkeleton]="skeletonTransactions"
+              />
+              <div tuiTitle [tuiSkeleton]="skeletonTransactions && 10">
+                {{ studentTransaction.student.fullName }}
+                <span tuiSubtitle>
+                  <tui-chip size="xxs" [style.background]="studentTransaction.student.beltLevel | beltLevelColor">{{ studentTransaction.student.beltLevel | beltLevel }}</tui-chip>
+                </span>
+              </div>
+              <div tuiTitle [tuiSkeleton]="skeletonTransactions && 10">
+                <strong [style.color]="getBalanceAppearance(studentTransaction.endBalance)">{{ studentTransaction.endBalance > 0 ? '+' : '' }}{{ studentTransaction.endBalance }} {{ 'RUB' | tuiCurrency }}</strong>
+                <span tuiSubtitle>Текущий баланс</span>
+              </div>
+              <button
+                appearance="secondary"
+                [iconStart]="studentTransaction.expanded ? '@tui.chevron-up' : '@tui.chevron-down'"
+                tuiIconButton
+                type="button"
+                size="m"
+                [tuiSkeleton]="skeletonTransactions"
+                [style.border-radius.%]="100"
+                (click)="studentTransaction.expanded = !studentTransaction.expanded"
+              ></button>
+            </label>
+            @if (studentTransaction.expanded) {
+              <tui-expand [expanded]="studentTransaction.expanded">
+                <ng-template tuiExpandContent>
+                  <div
+                    tuiAppearance="floating"
+                    tuiCardLarge
+                  >
+                    @if (studentTransaction.transactions.length > 0) {
+                      @for (transaction of studentTransaction.transactions.reverse(); track $index) {
+                        <label tuiCell>
+                          <tui-avatar
+                            size="m"
+                            src="@tui.russian-ruble"
+                            [appearance]="getTransactionBalance(transaction.income > 0 ? transaction.income : -transaction.outcome)"
+                          />
+                          <div tuiTitle [tuiSkeleton]="skeletonTransactions && 10">
+                            @if (transaction.income > 0) {
+                              <strong [style.color]="getBalanceAppearance(transaction.income)">{{ transaction.income > 0 ? '+' : '' }}{{ transaction.income }}   {{ 'RUB' | tuiCurrency }}</strong>
+                            } @else {
+                              <strong [style.color]="getBalanceAppearance(-transaction.outcome)">{{ -transaction.outcome > 0 ? '+' : '' }}{{ -transaction.outcome }}   {{ 'RUB' | tuiCurrency }}</strong>
+                            }
+                            <span tuiSubtitle>{{ transaction.datetime | date : 'medium' }}</span>
+                          </div>
+                          <div tuiTitle>
+                            <tui-badge appearance='positive' tuiStatus>
+                              {{ transaction.type }}
+                            </tui-badge>
+                          </div>
+                          <div tuiTitle>
+                            <button
+                              appearance="secondary"
+                              iconStart="@tui.receipt-text"
+                              tuiIconButton
+                              type="button"
+                              size="m"
+                              [style.border-radius.%]="100"
+                            ></button>
+                          </div>
+                        </label>
+                      }
+                    } @else {
                       <label tuiCell>
                         <tui-avatar
                           size="m"
                           src="@tui.russian-ruble"
-                          [appearance]="getTransactionBalance(transaction.sum)"
                         />
                         <div tuiTitle [tuiSkeleton]="skeletonTransactions && 10">
-                          <strong [style.color]="getBalanceAppearance(transaction.sum)">{{ transaction.sum > 0 ? '+' : '' }}{{ transaction.sum }}   {{ 'RUB' | tuiCurrency }}</strong>
-                          <span tuiSubtitle>{{ transaction.dt | date : 'medium' }}</span>
-                        </div>
-                        <div tuiTitle>
-                          <tui-badge appearance='positive' tuiStatus>
-                            {{ transaction.type }}
-                          </tui-badge>
-                        </div>
-                        <div tuiTitle>
-                          <button
-                            appearance="secondary"
-                            iconStart="@tui.receipt-text"
-                            tuiIconButton
-                            type="button"
-                            size="m"
-                            [style.border-radius.%]="100"
-                          ></button>
+                          <strong>Не найдена ни одна транзакция</strong>
                         </div>
                       </label>
                     }
-                  } @else {
-                    <label tuiCell>
-                      <tui-avatar
-                        size="m"
-                        src="@tui.russian-ruble"
-                      />
-                      <div tuiTitle [tuiSkeleton]="skeletonTransactions && 10">
-                        <strong>Не найдена ни одна транзакция</strong>
-                      </div>
-                    </label>
-                  }
-                </div>
-              </ng-template>
-            </tui-expand>
+                  </div>
+                </ng-template>
+              </tui-expand>
+            }
           }
+          <tui-pagination
+            size="l"
+            [index]="index"
+            [length]="length"
+          />
+        } @else {
+          <tui-scrollbar
+            waIntersectionRoot
+            class="scrollbar"
+            [hidden]="true"
+          >
+            <table
+              size="l"
+              tuiTable
+              class="table"
+              [columns]="groupTableColumns"
+              [direction]="-1">
+              <thead tuiThead>
+                <tr tuiThGroup>
+                  <th
+                    *tuiHead="'date'"
+                    rowspan="2"
+                    tuiTh
+                    class="first"
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    Дата
+                  </th>
+                  <th
+                    *tuiHead="'type'"
+                    rowspan="2"
+                    tuiTh
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    Тип
+                  </th>
+                  <th
+                    *tuiHead="'startSum'"
+                    colspan="4"
+                    tuiTh
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    Баланс
+                  </th>
+                </tr>
+                <tr tuiThGroup>
+                  <th
+                    *tuiHead="'startSum'"
+                    tuiTh
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    На начало
+                  </th>
+                  <th
+                    *tuiHead="'income'"
+                    tuiTh
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    Приход
+                  </th>
+                  <th
+                    *tuiHead="'outcome'"
+                    tuiTh
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    Расход
+                  </th>
+                  <th
+                    *tuiHead="'endSum'"
+                    tuiTh
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    На конец
+                  </th>
+                </tr>
+              </thead>
+              @for (studentTransactionsItem of studentTransactions; track $index) {
+                <tbody
+                  *tuiLet="studentTransactionsItem.transactions as studentTransactionsList"
+                  tuiTbody
+                  [heading]="studentTransactionsItem.student.fullName + ' – Баланс на конец периода: ' + studentTransactionsItem.endBalance"
+                  [data]="studentTransactionsList"
+                >
+                  @for (item of studentTransactionsList; track $index) {
+                    <tr tuiTr>
+                      <td
+                        *tuiCell="'date'"
+                        tuiTd
+                      >
+                        {{ item.datetime | date : 'medium' }}
+                      </td>
+                      <td
+                        *tuiCell="'type'"
+                        tuiTd
+                      >
+                        {{ item.type }}
+                      </td>
+                      <td
+                        *tuiCell="'startSum'"
+                        tuiTd
+                      >
+                        {{ item.startBalance !== 0 ? item.startBalance : '' }} 
+                      </td>
+                      <td
+                        *tuiCell="'income'"
+                        tuiTd
+                        [style.color]="'var(--tui-text-positive)'"
+                      >
+                        {{ item.income !== 0 ? item.income : '' }}
+                      </td>
+                      <td
+                        *tuiCell="'outcome'"
+                        tuiTd
+                        [style.color]="'var(--tui-text-negative)'"
+                      >
+                        {{ item.outcome !== 0 ? item.outcome : '' }}
+                      </td>
+                      <td
+                        *tuiCell="'endSum'"
+                        tuiTd
+                      >
+                        {{ item.endBalance !== 0 ? item.endBalance : '' }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              }
+            </table>
+          </tui-scrollbar>
         }
-        <tui-pagination
-          size="l"
-          [index]="index"
-          [length]="length"
-        />
       } @else {
         <label tuiCell>
           <tui-avatar
@@ -131,51 +316,204 @@
           </div>
         </label>
       }
-    } @else if (searchForm.controls.select.value === 'Учащийся') {
-      @if (transactions.length > 0) {
-        <label tuiCell>
-          <tui-avatar
-            size="m"
-            src="@tui.circle-dollar-sign"
-          />
-          <div tuiTitle [tuiSkeleton]="skeletonTransactions && 10">
-            <strong>{{ balance }} {{ 'RUB' | tuiCurrency }}</strong>
-            <span tuiSubtitle>Текущий баланс</span>
-          </div>
-        </label>
-        @for (transaction of transactions; track $index) {
+    } @else if (searchForm.controls.select.value === 'Учащийся' && studentTransaction) {
+      @if (studentTransaction.transactions.length > 0) {
+        @if (activeTab === 0) {
           <label tuiCell>
             <tui-avatar
               size="m"
-              src="@tui.russian-ruble"
-              [appearance]="getTransactionBalance(transaction.sum)"
+              src="@tui.circle-dollar-sign"
             />
             <div tuiTitle [tuiSkeleton]="skeletonTransactions && 10">
-              <strong [style.color]="getBalanceAppearance(transaction.sum)">{{ transaction.sum > 0 ? '+' : '' }}{{ transaction.sum }} {{ 'RUB' | tuiCurrency }}</strong>
-              <span tuiSubtitle>{{ transaction.dt | date : 'medium' }}</span>
-            </div>
-            <div tuiTitle>
-              <tui-badge appearance='positive' tuiStatus>
-                {{ transaction.type }}
-              </tui-badge>
-            </div>
-            <div tuiTitle>
-              <button
-                appearance="secondary"
-                iconStart="@tui.receipt-text"
-                tuiIconButton
-                type="button"
-                size="m"
-                [style.border-radius.%]="100"
-              ></button>
+              <strong>{{ balance }} {{ 'RUB' | tuiCurrency }}</strong>
+              <span tuiSubtitle>Баланс на конец периода</span>
             </div>
           </label>
+          @for (transaction of studentTransaction.transactions.reverse(); track $index) {
+            <label tuiCell>
+              <tui-avatar
+                size="m"
+                src="@tui.russian-ruble"
+                [appearance]="getTransactionBalance(transaction.income > 0 ? transaction.income : -transaction.outcome)"
+              />
+              <div tuiTitle [tuiSkeleton]="skeletonTransactions && 10">
+                @if (transaction.income > 0) {
+                  <strong [style.color]="getBalanceAppearance(transaction.income)">{{ transaction.income > 0 ? '+' : '' }}{{ transaction.income }}   {{ 'RUB' | tuiCurrency }}</strong>
+                } @else {
+                  <strong [style.color]="getBalanceAppearance(-transaction.outcome)">{{ -transaction.outcome > 0 ? '+' : '' }}{{ -transaction.outcome }}   {{ 'RUB' | tuiCurrency }}</strong>
+                }
+                <span tuiSubtitle>{{ transaction.datetime | date : 'medium' }}</span>
+              </div>
+              <div tuiTitle>
+                <tui-badge appearance='positive' tuiStatus>
+                  {{ transaction.type }}
+                </tui-badge>
+              </div>
+              <div tuiTitle>
+                <button
+                  appearance="secondary"
+                  iconStart="@tui.receipt-text"
+                  tuiIconButton
+                  type="button"
+                  size="m"
+                  [style.border-radius.%]="100"
+                ></button>
+              </div>
+            </label>
+          }
+          @if (studentTransaction.startBalance !== 0) {
+            <label tuiCell>
+              <tui-avatar
+                size="m"
+                src="@tui.circle-dollar-sign"
+              />
+              <div tuiTitle [tuiSkeleton]="skeletonTransactions && 10">
+                <strong>{{ studentTransaction.startBalance }} {{ 'RUB' | tuiCurrency }}</strong>
+                <span tuiSubtitle>Баланс на начало периода</span>
+              </div>
+            </label>
+          }
+          <tui-pagination
+            size="l"
+            [index]="index"
+            [length]="length"
+          />
+        } @else {
+          <tui-scrollbar
+            waIntersectionRoot
+            class="scrollbar"
+            [hidden]="true"
+          >
+            <table
+              size="l"
+              tuiTable
+              class="table"
+              [columns]="columns"
+              [direction]="-1">
+              <thead tuiThead>
+                <tr tuiThGroup>
+                  <th
+                    *tuiHead="'date'"
+                    rowspan="2"
+                    tuiTh
+                    class="first"
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    Дата
+                  </th>
+                  <th
+                    *tuiHead="'type'"
+                    rowspan="2"
+                    tuiTh
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    Тип
+                  </th>
+                  <th
+                    *tuiHead="'startSum'"
+                    colspan="4"
+                    tuiTh
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    Баланс
+                  </th>
+                </tr>
+                <tr tuiThGroup>
+                  <th
+                    *tuiHead="'startSum'"
+                    tuiTh
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    На начало
+                  </th>
+                  <th
+                    *tuiHead="'income'"
+                    tuiTh
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    Приход
+                  </th>
+                  <th
+                    *tuiHead="'outcome'"
+                    tuiTh
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    Расход
+                  </th>
+                  <th
+                    *tuiHead="'endSum'"
+                    tuiTh
+                    [sorter]="null"
+                    [sticky]="true"
+                    [resizable]="true"
+                  >
+                    На конец
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                *tuiLet="studentTransaction.transactions as transactionsList"
+                tuiTbody
+                [data]="transactionsList"
+              >
+                @for (item of transactionsList; track $index) {
+                  <tr tuiTr>
+                    <td
+                      *tuiCell="'date'"
+                      tuiTd
+                    >
+                      {{ item.datetime | date : 'medium' }}
+                    </td>
+                    <td
+                      *tuiCell="'type'"
+                      tuiTd
+                    >
+                      {{ item.type }}
+                    </td>
+                    <td
+                      *tuiCell="'startSum'"
+                      tuiTd
+                    >
+                      {{ item.startBalance !== 0 ? item.startBalance : '' }} 
+                    </td>
+                    <td
+                      *tuiCell="'income'"
+                      tuiTd
+                      [style.color]="'var(--tui-text-positive)'"
+                    >
+                      {{ item.income !== 0 ? item.income : '' }}
+                    </td>
+                    <td
+                      *tuiCell="'outcome'"
+                      tuiTd
+                      [style.color]="'var(--tui-text-negative)'"
+                    >
+                      {{ item.outcome !== 0 ? item.outcome : '' }}
+                    </td>
+                    <td
+                      *tuiCell="'endSum'"
+                      tuiTd
+                    >
+                      {{ item.endBalance !== 0 ? item.endBalance : '' }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </tui-scrollbar>
         }
-        <tui-pagination
-          size="l"
-          [index]="index"
-          [length]="length"
-        />
       } @else {
         <label tuiCell>
           <tui-avatar

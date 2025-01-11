@@ -13,6 +13,7 @@ import { ScheduleBatchRequest } from '../models/requests/schedule-batch.request'
 import { TransactionService } from '../../../modules/transaction/services/transaction.service';
 import { DepositRequest } from '../models/requests/deposit.request';
 import { AttendanceService } from '../../../modules/schedule/services/attendance.service';
+import { BillService } from '../../../modules/bill/services/bill.service';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,7 @@ export class FacadeService {
     private lessonPricePeriodService: LessonPricePeriodService,
     private attendanceService: AttendanceService,
     private transactionService: TransactionService,
+    private billService: BillService,
   ) {}
 
   public register(body: SignUpRequest) {
@@ -81,8 +83,8 @@ export class FacadeService {
     return this.studentService.getStudentById(id);
   }
 
-  public getLessonsByGroup(groupId: string) {
-    return this.lessonService.getLessonsByGroup(groupId);
+  public getLessonsByGroup(groupId: string, startTime?: string, endTime?: string) {
+    return this.lessonService.getLessonsByGroup(groupId, startTime, endTime);
   }
   
   public createGroupLesson(groupId: string, body: ScheduleLessonRequest) {
@@ -128,6 +130,10 @@ export class FacadeService {
   public unmarkAttendance(groupId: string, lessonId: string, studentId: string) {
     return this.attendanceService.unmarkAttendance(groupId, lessonId, studentId);
   }
+
+  public getAttendanceForPeriod(groupId: string, startTime?: string, endTime?: string) {
+    return this.attendanceService.getAttendanceForPeriod(groupId, startTime, endTime);
+  }
   
   public deposit(body: DepositRequest) {
     return this.transactionService.deposit(body);
@@ -141,12 +147,44 @@ export class FacadeService {
     return this.transactionService.getStudentBalance(studentId);
   }
 
-  public getStudentTransactions(studentId: string) {
-    return this.transactionService.getStudentTransactions(studentId);
+  public getStudentTransactions(studentId: string, startTime?: string, endTime?: string) {
+    return this.transactionService.getStudentTransactions(studentId, startTime, endTime);
   } 
 
-  public getGroupTransactions(groupId: string) {
-    return this.transactionService.getGroupTransactions(groupId);
+  public getGroupTransactions(groupId: string, startTime?: string, endTime?: string) {
+    return this.transactionService.getGroupTransactions(groupId, startTime, endTime);
+  }
+
+  public uploadBill(body: FormData) {
+    return this.billService.uploadBill(body);
+  }
+
+  public getPendingBills() {
+    return this.billService.getPendingBills();
+  }
+
+  public getMyBills() {
+    return this.billService.getMyBills();
+  }
+
+  public getBill(billId: string) {
+    return this.billService.getBill(billId);
+  }
+
+  public getBillImg(billId: string) {
+    return this.billService.getBillImg(billId);
+  }
+
+  public deleteBill(billId: string) {
+    return this.billService.deleteBill(billId);
+  }
+
+  public approveBill(billId: string) {
+    return this.billService.approveBill(billId);
+  }
+
+  public declineBill(billId: string) {
+    return this.billService.declineBill(billId);
   }
 
 }

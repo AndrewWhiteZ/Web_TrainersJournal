@@ -1,0 +1,125 @@
+@if (bill) {
+  <div
+    tuiAppearance="floating"
+    tuiCardLarge>
+    <div tuiHeader="xxl">
+      <h1 tuiTitle style="margin-top: 0px; margin-bottom: 0;">
+        <div tuiCaption>Чек от</div>
+        @if(!skeletonBill) {
+          <span>{{ bill.student.fullName }} <tui-chip size="s" [style.background]="bill.student.beltLevel | beltLevelColor">{{ bill.student.beltLevel | beltLevel }}</tui-chip></span>
+        } @else {
+          <span [tuiSkeleton]="true && 5"></span>
+        }
+        <div tuiSubtitle class="tui-space_top-4">
+          <tui-badge
+            [appearance]="getAppearanceByBillStatus(bill.status)"
+            size="xl"
+            tuiStatus
+          >
+            {{ bill.status }}
+          </tui-badge>
+        </div>
+      </h1>
+      <div tuiAccessories>
+        @if(bill) {
+          <tui-avatar
+            [src]="bill.student.fullName | tuiInitials"
+            [style.background]="bill.student.fullName | tuiAutoColor" 
+            size="xxl"
+          />
+        } @else {
+          <button
+            tuiIconButton
+            type="button"
+            size="xl"
+            [tuiSkeleton]="skeletonBill"
+            [style.border-radius.%]="100"
+            [tuiSkeleton]="true"
+          ></button>
+        }
+      </div>
+    </div>
+    <hr>
+    <label tuiCell>
+      <tui-avatar
+        size="m"
+        src="@tui.circle-help"
+      />
+      <div tuiTitle>
+        <strong>Статус</strong>
+        <span tuiSubtitle>{{ bill.status }}</span>
+      </div>
+      @if ((isAdmin() || isTrainer()) && isPending()) {
+        <button
+          appearance="positive"
+          tuiButton
+          type="button"
+          size="m"
+          iconStart="@tui.thumbs-up"
+          (click)="approveBill(bill.id)"
+        >Утвердить</button>
+        <button
+          appearance="negative"
+          tuiButton
+          type="button"
+          size="m"
+          iconStart="@tui.thumbs-down"
+          (click)="declineBill(bill.id)"
+        >Отклонить</button>
+      }
+    </label>
+    <label tuiCell>
+      <tui-avatar
+        size="m"
+        src="@tui.sigma"
+      />
+      <div tuiTitle>
+        <strong>{{ bill.amount > 0 ? '+' : '' }}{{ bill.amount }} {{ 'RUB' | tuiCurrency }}</strong>
+        <span tuiSubtitle>Сумма чека</span>
+      </div>
+    </label>
+    <label tuiCell>
+      <tui-avatar
+        size="m"
+        src="@tui.calendar-1"
+      />
+      <div tuiTitle>
+        <strong>{{ bill.createdDt | date : 'medium' }}</strong>
+        <span tuiSubtitle>Дата загрузки чека</span>
+      </div>
+    </label>
+    <label tuiCell>
+      <tui-avatar
+        size="m"
+        src="@tui.image"
+      />
+      <div tuiTitle>
+        <strong>Чек</strong>
+        <span tuiSubtitle>Изображение чека</span>
+      </div>
+      <button
+        appearance="secondary"
+        iconStart="@tui.eye"
+        tuiIconButton
+        type="button"
+        size="m"
+        [style.border-radius.%]="100"
+        (click)="expanded = !expanded"
+      ></button>
+      <button
+        appearance="positive"
+        iconStart="@tui.image-down"
+        tuiIconButton
+        type="button"
+        size="m"
+        [style.border-radius.%]="100"
+        (click)="downloadReceipt()"
+      ></button>
+    </label>
+    <tui-expand [expanded]="expanded">
+      <div>
+        <img style="inline-size: 100%;" [src]="imageUrl"/>
+      </div>
+    </tui-expand>
+  </div>
+}

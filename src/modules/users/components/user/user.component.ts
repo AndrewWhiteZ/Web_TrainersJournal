@@ -56,10 +56,8 @@ export class UserComponent implements OnInit, OnDestroy {
   private readonly alerts = inject(TuiAlertService);
 
   protected skeletonUser: boolean = true;
-  protected skeletonTransactions: boolean = true;
 
   protected user: StudentEntity | UserEntity | null = null;
-  protected transactions: Array<TransactionEntity> = new Array;
   protected balance: number = 0;
 
   private routeSub: Subscription = new Subscription;
@@ -79,7 +77,6 @@ export class UserComponent implements OnInit, OnDestroy {
     this.routeSub = this.route.params.subscribe(params => {
       const userId = params['id'];
       this.getUserById(userId);
-      this.getStudentTransactions(userId);
       this.getStudentBalance(userId);
     })
   }
@@ -100,22 +97,7 @@ export class UserComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected getStudentTransactions(userId: string) {
-    this.skeletonTransactions = true;
-    this.facadeService.getStudentTransactions(userId).subscribe({
-      next: (response) => {
-        this.transactions = new Array;
-        response.data.map((dto) => this.transactions.push(TransactionMapper.mapToEntity(dto)));
-        this.skeletonTransactions = false;
-        console.log(this.transactions);
-      },
-      error: (response) => this.showAlert("Ошибка", response.error.message, "negative", 5000),
-      complete: () => this.cdr.detectChanges()
-    });
-  }
-
   protected getStudentBalance(userId: string) {
-    this.skeletonTransactions = true;
     this.facadeService.getStudentBalance(userId).subscribe({
       next: (response) => {
         this.balance = response.data;
